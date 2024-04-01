@@ -50,24 +50,10 @@ async function getSavedTracks() {
 //#endregion
 
 //#region TRESHOLD ALGORITHM
-async function checkAlbum(idsString,idsList) {
+async function addAlbums(idsString) {
     try {
-        const response = await axios.get(`https://api.spotify.com/v1/me/albums/contains?ids=${idsString}`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
-        
-        var idsToSaveString = "";
-        for(var i in response.data) {
-            if(!response.data[i]) {
-                idsToSaveString = idsToSaveString.concat(idsList[i],',');
-                
-                var artistsNames = "";
-                albums[idsList[i]].artistsNames.forEach(name => artistsNames = artistsNames.concat(name,' & '));
-                artistsNames = artistsNames.substring(0, artistsNames.length - 3);
-                console.log(`New saved album: ${albums[idsList[i]].name} from ${artistsNames}`);
-            }
-        }
-
-        await axios.put(`https://api.spotify.com/v1/me/albums?ids=${idsToSaveString}`, { x: 'x' } , { headers: { 'Authorization': 'Bearer ' + accessToken, } });
-    } catch (error) { webError("Check album", error) }
+        await axios.put(`https://api.spotify.com/v1/me/albums?ids=${idsString}`, { x: 'x' } , { headers: { 'Authorization': 'Bearer ' + accessToken, } });
+    } catch (error) { webError("Check and add album", error) }
 }
 
 async function tresholdAlgorithm() {
@@ -80,20 +66,75 @@ async function tresholdAlgorithm() {
 
     var idsString = "";
     var idsList = [];
-    var tmp = 0;
+    var idsCounter = 0;
     for(var album of lovedAlbum ) {
         idsList.push(album);
         idsString = idsString.concat(album,',');
-        tmp = tmp+1;
+        idsCounter = idsCounter+1;
 
-        if(tmp == 20){
-            await checkAlbum(idsString,idsList);
+        if(idsCounter == 20){
+            await addAlbums(idsString);
             idsString = "";
             idsList = [];
-            tmp = 0;
+            idsCounter = 0;
         }
     }
-    await checkAlbum(idsString,idsList);
+    if(idsCounter > 0)
+        await addAlbums(idsString);
+}
+//#endregion
+
+//#region REMOVE SAVED TRACKS FROM SAVED ALBUMS
+async function removeTracks(idsToDelete) {
+    try {
+        await axios.delete(`https://api.spotify.com/v1/me/tracks?ids=${idsToDelete}`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });    
+    } catch (error) { webError("Remove tracks", error) }
+}
+
+async function checkAlbums(idsString, idsList) {
+    try {
+        const response = await axios.get(`https://api.spotify.com/v1/me/albums/contains?ids=${idsString}`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
+
+        var idsToDelete = "";
+        var idsCounter = 0;
+        for(var i in response.data) {
+            if(response.data[i]) {
+                for(var track of albums[idsList[i]].savedTracks) {
+                    idsToDelete = idsToDelete.concat(track, ',');
+                    idsCounter = idsCounter+1;
+                    if(idsCounter == 50) {
+                        await removeTracks(idsToDelete);
+                        var idsToDelete = "";
+                        var idsCounter = 0;
+                    }
+                }
+            }
+        }
+        if(idsCounter > 0)
+            await removeTracks(idsToDelete);
+    } catch (error) { webError("Check albums", error) }
+}
+
+async function removeTracksAlgorithm() {
+    var idsString = "";
+    var idsList = [];
+    var idsCounter = 0;
+
+    for(var album in albums) {
+        idsList.push(album);
+        idsString = idsString.concat(album,',');
+        idsCounter = idsCounter+1;
+
+        if(idsCounter == 20){
+            await checkAlbums(idsString, idsList);
+
+            idsString = "";
+            idsList = [];
+            idsCounter = 0;
+        }
+    }
+    if(idsCounter > 0)
+        await checkAlbums(idsString, idsList);
 }
 //#endregion
 
@@ -123,9 +164,11 @@ async function stepExecution(stepName, stepFunc) {
 async function main() {
     const step1 = "Get liked tracks";
     const step2 = "Apply treshold algorithm";
+    const step3 = "Remove saved tracks from saved albums";
     try {
         await stepExecution(step1, getSavedTracks);
         await stepExecution(step2, tresholdAlgorithm);
+        await stepExecution(step3, removeTracksAlgorithm);
     } catch (error) { }
 }
 //#endregion
@@ -135,5 +178,6 @@ module.exports = {
     main,
 
     // For tests
+
 }
 //#endregion
