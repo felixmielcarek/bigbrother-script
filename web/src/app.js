@@ -14,7 +14,7 @@ const port = 3000
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = 'http://localhost:3000/callback';
-const scope = 'user-read-private user-read-email user-library-read';
+const scope = 'user-read-private user-read-email user-library-read user-library-modify';
 //#endregion
 
 //#region APP INIT
