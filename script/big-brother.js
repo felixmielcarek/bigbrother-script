@@ -27,7 +27,7 @@ async function getOffsetSavedTracks(href=`https://api.spotify.com/v1/me/tracks?o
     try {
         const response = await axios.get(href, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
         response.data.items.forEach(t => {
-            if(t.track.album.album_type !== "single") {
+            if(t.track.album.total_tracks > 1) {
                 if(!albums[t.track.album.id]) {
                     var albumData = Object.create(albumDataStructure);
                     albumData.savedTracks = [];
