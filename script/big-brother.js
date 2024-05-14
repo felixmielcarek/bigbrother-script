@@ -6,17 +6,19 @@ const { Client } = require('pg');
 //#region CONSTANTS
 const spotifyRequestsLimit = 50;
 const thresholdLove = 0.6;
+const clientId = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
 const client = new Client({
     user: process.env.DB_USER,
     host: 'localhost',
     database: 'bigbrother',
     password: process.env.DB_PASSWORD,
     port: 5432
-  });
+});
 //#endregion
 
 //#region STRUCTURE
-var albumDataStructure = {
+let albumDataStructure = {
     savedTracks: [],
     totalTracks: 0,
     name: "",
@@ -31,7 +33,7 @@ async function getSavedTracks(accessToken, albums, href=`https://api.spotify.com
         response.data.items.forEach(t => {
             if(t.track.album.total_tracks > 1) {
                 if(!albums[t.track.album.id]) {
-                    var albumData = Object.create(albumDataStructure);
+                    let albumData = Object.create(albumDataStructure);
                     albumData.savedTracks = [];
                     albumData.totalTracks = t.track.album.total_tracks;
                     albums[t.track.album.id] = albumData;
@@ -55,17 +57,17 @@ async function addAlbums(accessToken, idsString) {
 }
 
 async function tresholdAlgorithm(albums, accessToken) {
-    var lovedAlbum = []
+    let lovedAlbum = []
     for(let album in albums) {
         if(albums[album].savedTracks.length >= albums[album].totalTracks * thresholdLove) {
             lovedAlbum.push(album);
         }
     }
 
-    var idsString = "";
-    var idsList = [];
-    var idsCounter = 0;
-    for(var album of lovedAlbum ) {
+    let idsString = "";
+    let idsList = [];
+    let idsCounter = 0;
+    for(let album of lovedAlbum ) {
         idsList.push(album);
         idsString = idsString.concat(album,',');
         idsCounter = idsCounter+1;
@@ -93,17 +95,17 @@ async function checkAlbums(accessToken, idsString, idsList, albums) {
     try {
         const response = await axios.get(`https://api.spotify.com/v1/me/albums/contains?ids=${idsString}`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
 
-        var idsToDelete = "";
-        var idsCounter = 0;
-        for(var i in response.data) {
+        let idsToDelete = "";
+        let idsCounter = 0;
+        for(let i in response.data) {
             if(response.data[i]) {
-                for(var track of albums[idsList[i]].savedTracks) {
+                for(let track of albums[idsList[i]].savedTracks) {
                     idsToDelete = idsToDelete.concat(track, ',');
                     idsCounter = idsCounter+1;
                     if(idsCounter == 50) {
                         await removeTracks(accessToken, idsToDelete);
-                        var idsToDelete = "";
-                        var idsCounter = 0;
+                        let idsToDelete = "";
+                        let idsCounter = 0;
                     }
                 }
             }
@@ -114,11 +116,11 @@ async function checkAlbums(accessToken, idsString, idsList, albums) {
 }
 
 async function removeTracksAlgorithm(albums, accessToken) {
-    var idsString = "";
-    var idsList = [];
-    var idsCounter = 0;
+    let idsString = "";
+    let idsList = [];
+    let idsCounter = 0;
 
-    for(var album in albums) {
+    for(let album in albums) {
         idsList.push(album);
         idsString = idsString.concat(album,',');
         idsCounter = idsCounter+1;
@@ -153,34 +155,66 @@ function stepBeggining(step) {
 //#endregion
 
 //#region MAIN
-async function main() {
+async function mainAlgorithm(accessToken) {
+    let albums = {};
+
+    const step1 = "Get liked tracks";
+    const step2 = "Apply treshold algorithm";
+    const step3 = "Remove saved tracks from saved albums";
     try {
-        await client.connect();
-        const query = 'SELECT accesstoken FROM public.users';
-        const result = await client.query(query);
-    
-        result.rows.forEach(async (row) => {
-            var albums = {};
-            var accessToken = row.accesstoken
+        stepBeggining(step1);
+        await getSavedTracks(accessToken, albums);
+        stepSuccess(step1);
 
-            const step1 = "Get liked tracks";
-            const step2 = "Apply treshold algorithm";
-            const step3 = "Remove saved tracks from saved albums";
-            try {
-                stepBeggining(step1);
-                await getSavedTracks(accessToken, albums);
-                stepSuccess(step1);
+        stepBeggining(step2);
+        await tresholdAlgorithm(albums, accessToken);
+        stepSuccess(step2);
 
-                stepBeggining(step2);
-                await tresholdAlgorithm(albums, accessToken);
-                stepSuccess(step2);
+        stepBeggining(step3);
+        await removeTracksAlgorithm(albums, accessToken);
+        stepSuccess(step3);
+    } catch (error) { }
+}
 
-                stepBeggining(step3);
-                await removeTracksAlgorithm(albums, accessToken);
-                stepSuccess(step3);
-            } catch (error) { }
-        });
-    } catch (error) { console.error('Error executing query:', error) } finally { await client.end() }
+async function main() {
+    await client.connect();
+
+    try {
+        const selectQuery = 'SELECT * FROM public.users';   
+        const selectResult = await client.query(selectQuery);
+
+        for(let row of selectResult.rows) {
+            const spotifyId = row.spotifyid;
+            const refreshToken = row.refreshtoken;            
+
+            let authOptions = {
+                url: 'https://accounts.spotify.com/api/token',
+                method: 'post',
+                data: {
+                    refresh_token: refreshToken,
+                    grant_type: 'refresh_token',
+                },
+                headers: {
+                    'content-type': 'application/x-www-form-urlencoded',
+                    'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
+                },
+                json: true
+            };
+         
+            const response = await axios(authOptions);
+            const newAccessToken = response.data.access_token;
+            const newRefreshToken = response.data.refresh_token;
+
+            const updateQuery = `
+                UPDATE public.users
+                SET accesstoken = $2, refreshtoken = $3
+                WHERE spotifyid = $1;
+            `;
+            await client.query(updateQuery, [spotifyId, newAccessToken, newRefreshToken])
+
+            await mainAlgorithm(newAccessToken);
+        }
+    } catch (error) { console.error('Error executing select query:', error) } finally { await client.end() }
 }
 //#endregion
 

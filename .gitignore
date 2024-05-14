@@ -131,3 +131,4 @@ dist
 
 # Specific to Gold Digger
 spotify_access_token
+.vscode/

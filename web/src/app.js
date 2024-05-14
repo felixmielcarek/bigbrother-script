@@ -4,13 +4,11 @@ const express = require('express')
 const cookieParser = require('cookie-parser');
 const axios = require('axios');
 const queryString = require('querystring');
-const fs = require('node:fs');
 const pg = require('pg');
 //#endregion
 
 //#region CONSTANTS
 const staticDir = path.join(__dirname, '../public');
-const commonDir = path.join(__dirname, '../../common');
 const port = 3000
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -99,34 +97,29 @@ app.get('/callback', (req, res) => {
 
   axios(authOptions)
     .then(async response => {
-      /*fs.writeFile(commonDir + '/spotify_access_token', response.data.access_token, err => {
-        if (err) {
-          console.error(err);
-        } else {
-          console.log("Spotify access token recovered.")
-        }
-      });*/
-
       const accessToken = response.data.access_token
+      const refreshToken = response.data.refresh_token
 
       try {
         const response = await axios.get(`https://api.spotify.com/v1/me`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
         
         const data = {
           SpotifyId: response.data.id,
-          AccessToken: accessToken
+          AccessToken: accessToken,
+          RefreshToken: refreshToken
         };
 
         await client.connect()
 
         const sqlQuery = `
-          INSERT INTO public.users (spotifyid,accesstoken)
-          VALUES ($1,$2)
+          INSERT INTO public.users (spotifyid,accesstoken,refreshtoken)
+          VALUES ($1,$2,$3)
           ON CONFLICT (spotifyid) DO UPDATE SET
-          accesstoken = EXCLUDED.accesstoken
+          accesstoken = EXCLUDED.accesstoken,
+          refreshtoken = EXCLUDED.refreshtoken
         `;
         
-        client.query(sqlQuery, [data.SpotifyId, data.AccessToken], (err, res) => {
+        client.query(sqlQuery, [data.SpotifyId, data.AccessToken, data.RefreshToken], (err, res) => {
           if (err) {
             console.error('Error executing query', err);
             return;
