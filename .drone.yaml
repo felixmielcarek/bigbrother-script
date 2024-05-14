@@ -1,0 +1,33 @@
+kind: pipeline
+type: docker
+name: DB_PIPELINE
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+
+- name: deploy-container-pgsql
+  image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
+  environment:
+      IMAGENAME: postgres:latest
+      CONTAINERNAME: pgsql
+      COMMAND: create
+      OVERWRITE: false
+      PRIVATE: true
+      CODEFIRST_CLIENTDRONE_ENV_PG_ROOT_PASSWORD:
+        from_secret: db_root_password
+      CODEFIRST_CLIENTDRONE_ENV_PG_DATABASE:
+        from_secret: db_database
+      CODEFIRST_CLIENTDRONE_ENV_PG_USER:
+        from_secret: db_user
+      CODEFIRST_CLIENTDRONE_ENV_PG_PASSWORD:
+        from_secret: db_password
+
+#- name: create-bigbrother-database
+#  image: node:latest
+#  commands:
+#    - node database/db-creation.js
+  
+  
