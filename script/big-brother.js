@@ -1,13 +1,18 @@
 //#region REQUIRE
 const axios = require('axios');
-const fs = require('node:fs');
-const path = require('path');
+const { Client } = require('pg');
 //#endregion
 
 //#region CONSTANTS
-const commonDir = path.join(__dirname, '../common');
 const spotifyRequestsLimit = 50;
 const thresholdLove = 0.6;
+const client = new Client({
+    user: process.env.DB_USER,
+    host: 'localhost',
+    database: 'bigbrother',
+    password: process.env.DB_PASSWORD,
+    port: 5432
+  });
 //#endregion
 
 //#region STRUCTURE
@@ -149,29 +154,33 @@ function stepBeggining(step) {
 
 //#region MAIN
 async function main() {
-    var albums = {};
-
-    var accessToken;
-    try { accessToken = fs.readFileSync(commonDir + '/spotify_access_token', 'utf8') }
-    catch (err) { console.error(err) }
-
-    // ======================================================
-    const step1 = "Get liked tracks";
-    const step2 = "Apply treshold algorithm";
-    const step3 = "Remove saved tracks from saved albums";
     try {
-        stepBeggining(step1);
-        await getSavedTracks(accessToken, albums);
-        stepSuccess(step1);
+        await client.connect();
+        const query = 'SELECT accesstoken FROM public.users';
+        const result = await client.query(query);
+    
+        result.rows.forEach(async (row) => {
+            var albums = {};
+            var accessToken = row.accesstoken
 
-        stepBeggining(step2);
-        await tresholdAlgorithm(albums, accessToken);
-        stepSuccess(step2);
+            const step1 = "Get liked tracks";
+            const step2 = "Apply treshold algorithm";
+            const step3 = "Remove saved tracks from saved albums";
+            try {
+                stepBeggining(step1);
+                await getSavedTracks(accessToken, albums);
+                stepSuccess(step1);
 
-        stepBeggining(step3);
-        await removeTracksAlgorithm(albums, accessToken);
-        stepSuccess(step3);
-    } catch (error) { }
+                stepBeggining(step2);
+                await tresholdAlgorithm(albums, accessToken);
+                stepSuccess(step2);
+
+                stepBeggining(step3);
+                await removeTracksAlgorithm(albums, accessToken);
+                stepSuccess(step3);
+            } catch (error) { }
+        });
+    } catch (error) { console.error('Error executing query:', error) } finally { await client.end() }
 }
 //#endregion
 
