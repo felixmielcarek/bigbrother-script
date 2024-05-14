@@ -4,26 +4,23 @@ const fs = require('node:fs');
 const path = require('path');
 //#endregion
 
-//#region VARIABLES
+//#region CONSTANTS
 const commonDir = path.join(__dirname, '../common');
 const spotifyRequestsLimit = 50;
 const thresholdLove = 0.6;
+//#endregion
 
-var albums = {};
+//#region STRUCTURE
 var albumDataStructure = {
     savedTracks: [],
     totalTracks: 0,
     name: "",
     artistsNames: []
 };
-
-var accessToken;
-try { accessToken = fs.readFileSync(commonDir + '/spotify_access_token', 'utf8') }
-catch (err) { console.error(err) }
 //#endregion
 
 //#region GET SAVED TRACKS
-async function getOffsetSavedTracks(href=`https://api.spotify.com/v1/me/tracks?offset=0&limit=${spotifyRequestsLimit}`) {
+async function getSavedTracks(accessToken, albums, href=`https://api.spotify.com/v1/me/tracks?offset=0&limit=${spotifyRequestsLimit}`) {
     try {
         const response = await axios.get(href, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
         response.data.items.forEach(t => {
@@ -40,23 +37,19 @@ async function getOffsetSavedTracks(href=`https://api.spotify.com/v1/me/tracks?o
                 albums[t.track.album.id].savedTracks.push(t.track.id);
             }
         });
-        if(response.data.next) await getOffsetSavedTracks(response.data.next);
+        if(response.data.next) await getSavedTracks(accessToken, albums, response.data.next);
     } catch (error) { webError("Get saved tracks", error) }
-}
-
-async function getSavedTracks() {
-    await getOffsetSavedTracks();
 }
 //#endregion
 
 //#region TRESHOLD ALGORITHM
-async function addAlbums(idsString) {
+async function addAlbums(accessToken, idsString) {
     try {
         await axios.put(`https://api.spotify.com/v1/me/albums?ids=${idsString}`, { x: 'x' } , { headers: { 'Authorization': 'Bearer ' + accessToken, } });
     } catch (error) { webError("Check and add album", error) }
 }
 
-async function tresholdAlgorithm() {
+async function tresholdAlgorithm(albums, accessToken) {
     var lovedAlbum = []
     for(let album in albums) {
         if(albums[album].savedTracks.length >= albums[album].totalTracks * thresholdLove) {
@@ -73,25 +66,25 @@ async function tresholdAlgorithm() {
         idsCounter = idsCounter+1;
 
         if(idsCounter == 20){
-            await addAlbums(idsString);
+            await addAlbums(accessToken, idsString);
             idsString = "";
             idsList = [];
             idsCounter = 0;
         }
     }
     if(idsCounter > 0)
-        await addAlbums(idsString);
+        await addAlbums(accessToken, idsString);
 }
 //#endregion
 
 //#region REMOVE SAVED TRACKS FROM SAVED ALBUMS
-async function removeTracks(idsToDelete) {
+async function removeTracks(accessToken, idsToDelete) {
     try {
         await axios.delete(`https://api.spotify.com/v1/me/tracks?ids=${idsToDelete}`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });    
     } catch (error) { webError("Remove tracks", error) }
 }
 
-async function checkAlbums(idsString, idsList) {
+async function checkAlbums(accessToken, idsString, idsList, albums) {
     try {
         const response = await axios.get(`https://api.spotify.com/v1/me/albums/contains?ids=${idsString}`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
 
@@ -103,7 +96,7 @@ async function checkAlbums(idsString, idsList) {
                     idsToDelete = idsToDelete.concat(track, ',');
                     idsCounter = idsCounter+1;
                     if(idsCounter == 50) {
-                        await removeTracks(idsToDelete);
+                        await removeTracks(accessToken, idsToDelete);
                         var idsToDelete = "";
                         var idsCounter = 0;
                     }
@@ -111,11 +104,11 @@ async function checkAlbums(idsString, idsList) {
             }
         }
         if(idsCounter > 0)
-            await removeTracks(idsToDelete);
+            await removeTracks(accessToken, idsToDelete);
     } catch (error) { webError("Check albums", error) }
 }
 
-async function removeTracksAlgorithm() {
+async function removeTracksAlgorithm(albums, accessToken) {
     var idsString = "";
     var idsList = [];
     var idsCounter = 0;
@@ -126,7 +119,7 @@ async function removeTracksAlgorithm() {
         idsCounter = idsCounter+1;
 
         if(idsCounter == 20){
-            await checkAlbums(idsString, idsList);
+            await checkAlbums(accessToken, idsString, idsList, albums);
 
             idsString = "";
             idsList = [];
@@ -134,7 +127,7 @@ async function removeTracksAlgorithm() {
         }
     }
     if(idsCounter > 0)
-        await checkAlbums(idsString, idsList);
+        await checkAlbums(accessToken, idsString, idsList, albums);
 }
 //#endregion
 
@@ -152,23 +145,32 @@ function stepBeggining(step) {
     const sptor = "=".repeat(5);
     console.log(`\n${sptor} ${step} ${sptor}`);
 }
-
-async function stepExecution(stepName, stepFunc) {
-    stepBeggining(stepName);
-    await stepFunc()
-    stepSuccess(stepName);
-}
 //#endregion
 
 //#region MAIN
 async function main() {
+    var albums = {};
+
+    var accessToken;
+    try { accessToken = fs.readFileSync(commonDir + '/spotify_access_token', 'utf8') }
+    catch (err) { console.error(err) }
+
+    // ======================================================
     const step1 = "Get liked tracks";
     const step2 = "Apply treshold algorithm";
     const step3 = "Remove saved tracks from saved albums";
     try {
-        await stepExecution(step1, getSavedTracks);
-        await stepExecution(step2, tresholdAlgorithm);
-        await stepExecution(step3, removeTracksAlgorithm);
+        stepBeggining(step1);
+        await getSavedTracks(accessToken, albums);
+        stepSuccess(step1);
+
+        stepBeggining(step2);
+        await tresholdAlgorithm(albums, accessToken);
+        stepSuccess(step2);
+
+        stepBeggining(step3);
+        await removeTracksAlgorithm(albums, accessToken);
+        stepSuccess(step3);
     } catch (error) { }
 }
 //#endregion

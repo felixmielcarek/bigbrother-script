@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const axios = require('axios');
 const queryString = require('querystring');
 const fs = require('node:fs');
+const pg = require('pg');
 //#endregion
 
 //#region CONSTANTS
@@ -15,6 +16,18 @@ const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = 'http://localhost:3000/callback';
 const scope = 'user-read-private user-read-email user-library-read user-library-modify';
+const { Client } = pg
+const client = new Client({
+  user: process.env.DB_USER,
+  host: 'localhost',
+  database: 'bigbrother',
+  password: process.env.DB_PASSWORD,
+  port: 5432
+})
+//#endregion
+
+//#region VARIABLES
+let state = '';
 //#endregion
 
 //#region APP INIT
@@ -44,7 +57,7 @@ function generateRandomString(length) {
 }
 
 app.get('/login', function (req, res) {
-  const state = generateRandomString(16);
+  state = generateRandomString(16);
 
   res.redirect('https://accounts.spotify.com/authorize?' +
     queryString.stringify({
@@ -60,8 +73,12 @@ app.get('/login', function (req, res) {
 //#region ACCESS TOKEN
 app.get('/callback', (req, res) => {
   res.cookie('account', 'true', { maxAge: 360000 });
+
   const code = req.query.code;
-  const state = req.query.state;
+  if(state != req.query.state) {
+    console.error("Spotify state error.")
+    return
+  }
 
   res.redirect('/');
 
@@ -81,14 +98,43 @@ app.get('/callback', (req, res) => {
   };
 
   axios(authOptions)
-    .then(response => {
-      fs.writeFile(commonDir + '/spotify_access_token', response.data.access_token, err => {
+    .then(async response => {
+      /*fs.writeFile(commonDir + '/spotify_access_token', response.data.access_token, err => {
         if (err) {
           console.error(err);
         } else {
           console.log("Spotify access token recovered.")
         }
-      });
+      });*/
+
+      const accessToken = response.data.access_token
+
+      try {
+        const response = await axios.get(`https://api.spotify.com/v1/me`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
+        
+        const data = {
+          SpotifyId: response.data.id,
+          AccessToken: accessToken
+        };
+
+        await client.connect()
+
+        const sqlQuery = `
+          INSERT INTO public.users (spotifyid,accesstoken)
+          VALUES ($1,$2)
+          ON CONFLICT (spotifyid) DO UPDATE SET
+          accesstoken = EXCLUDED.accesstoken
+        `;
+        
+        client.query(sqlQuery, [data.SpotifyId, data.AccessToken], (err, res) => {
+          if (err) {
+            console.error('Error executing query', err);
+            return;
+          }
+          console.log('Data inserted/updated successfully');
+          client.end();
+        });
+      } catch (error) { console.log('Error getting user Spotify id') }
     })
     .catch(error => {
       console.log('Error:', error);
