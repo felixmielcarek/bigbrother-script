@@ -2,12 +2,6 @@ kind: pipeline
 type: docker
 name: DB_PIPELINE
 
-trigger:
-  branch:
-    - main
-  event:
-    - push
-
 - name: deploy-container-pgsql
   image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
   environment:
