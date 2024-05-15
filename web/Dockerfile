@@ -10,7 +10,6 @@ WORKDIR /usr/src/app
 
 COPY web/src/package*.json ./web/src/
 RUN npm install ./web/src
-RUN apt-get update && apt-get install python3-os
 
 COPY web ./web/
 COPY common ./common/
