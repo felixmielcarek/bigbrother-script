@@ -37,4 +37,5 @@ steps:
        from_secret: db_user
      POSTGRES_PASSWORD:
        from_secret: db_password
+    secrets: [ db_root_password , db_database , db_user , db_password ]
     depends_on: [ deploy-container-pgsql ]
