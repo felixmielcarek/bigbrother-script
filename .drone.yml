@@ -21,9 +21,9 @@ steps:
       CODEFIRST_CLIENTDRONE_ENV_PG_PASSWORD:
         from_secret: db_password
 
-#- name: create-bigbrother-database
-#  image: node:latest
-#  commands:
-#    - node database/db-creation.js
-  
-  
+  - name: create-bigbrother-database
+    image: node:latest
+    commands:
+      - cd database/
+      - npm install
+      - node database/db-creation.js
