@@ -11,6 +11,8 @@ conn = psycopg2.connect(dbname="postgres", user=env_user, password=env_password,
 # Create a cursor object to execute SQL queries
 cur = conn.cursor()
 
+conn.autocommit = True
+
 create_db_query = '''
 -- Database: bigbrother
 
