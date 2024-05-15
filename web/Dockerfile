@@ -8,12 +8,12 @@ RUN apt-get update && \
 # Set working directory inside the container
 WORKDIR /usr/src/app
 
-COPY web/src/package*.json ./web/src
+COPY web/src/package*.json ./web/src/
 RUN npm install ./web/src
 RUN pip3 install os
 
-COPY web ./web
-COPY common ./common
+COPY web ./web/
+COPY common ./common/
 
 # Expose the port the app runs on
 EXPOSE 3000
