@@ -1,4 +1,14 @@
 {
+  "name": "bigbrother-web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "keywords": [
+    "big-brother",
+    "spotify"
+  ],
+  "author": "Félix Mielcarek",
+  "license": "MIT",
   "dependencies": {
     "axios": "^1.6.7",
     "cookie-parser": "^1.4.6",
