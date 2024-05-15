@@ -8,7 +8,7 @@ env_password = os.getenv('POSTGRES_PASSWORD')
 
 # Establish connection to the PostgreSQL database
 conn = psycopg2.connect(dbname="postgres", user=env_user, password=env_password, host="felixmielcarek-bigbrotherdb")
-con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
 # Create a cursor object to execute SQL queries
 cur = conn.cursor()
