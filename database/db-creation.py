@@ -17,7 +17,7 @@ def executeDBQuery(query):
     conn.close()
 
 create_db_query = '''
-CREATE DATABASE IF NOT EXISTS bigbrother;
+CREATE DATABASE bigbrother;
 '''
 
 create_schema_query = '''
