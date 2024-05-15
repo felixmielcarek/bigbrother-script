@@ -2,9 +2,11 @@ kind: pipeline
 type: docker
 name: DB_PIPELINE
 
-- name: deploy-container-pgsql
-  image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
-  environment:
+
+steps:
+  - name: deploy-container-pgsql
+    image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
+    environment:
       IMAGENAME: postgres:latest
       CONTAINERNAME: pgsql
       COMMAND: create
