@@ -12,13 +12,13 @@ steps:
       COMMAND: create
       OVERWRITE: false
       PRIVATE: true
-      CODEFIRST_CLIENTDRONE_ENV_PG_ROOT_PASSWORD:
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_ROOT_PASSWORD:
         from_secret: db_root_password
-      CODEFIRST_CLIENTDRONE_ENV_PG_DATABASE:
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_DATABASE:
         from_secret: db_database
-      CODEFIRST_CLIENTDRONE_ENV_PG_USER:
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_USER:
         from_secret: db_user
-      CODEFIRST_CLIENTDRONE_ENV_PG_PASSWORD:
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
         from_secret: db_password
 
   - name: create-bigbrother-database
