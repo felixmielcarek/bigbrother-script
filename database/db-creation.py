@@ -2,13 +2,16 @@ import os
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-env_dbname = os.getenv('POSTGRES_DATABASE')
-env_user = os.getenv('POSTGRES_USER')
-env_password = os.getenv('POSTGRES_PASSWORD')
+env_root_password = os.getenv('POSTGRES_ROOT_PASSWORD')
 
 # Establish connection to the PostgreSQL database
-conn = psycopg2.connect(dbname="postgres", user=env_user, password=env_password, host="felixmielcarek-bigbrotherdb")
-conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+conn = psycopg2.connect(
+    dbname="postgres", 
+    user="postgres", 
+    password=env_root_password, 
+    host="felixmielcarek-bigbrotherdb"
+)
+conn.autocommit = True
 
 # Create a cursor object to execute SQL queries
 cur = conn.cursor()
@@ -70,13 +73,12 @@ ALTER TABLE IF EXISTS public.users
 '''
 
 # Execute the SQL queries
+
+#Creating a database
+conn.close()
 cur.execute(create_db_query)
 cur.execute(create_schema_query)
 cur.execute(create_table_query)
 
-# Commit the changes to the database
-conn.commit()
-
 # Close the cursor and the connection
-cur.close()
 conn.close()
