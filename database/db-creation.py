@@ -3,9 +3,9 @@ import os
 
 # Establish connection to the PostgreSQL database
 conn = psycopg2.connect(
-    dbname=os.environ['db_database'],
-    user=os.environ['db_user'],
-    password=os.environ['db_password'],
+    dbname=os.environ['DB_DATABASE'],
+    user=os.environ['DB_USER'],
+    password=os.environ['DB_PASSWORD'],
     host="localhost"
 )
 
