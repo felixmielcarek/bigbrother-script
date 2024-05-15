@@ -1,6 +1,5 @@
 import os
 import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 env_user = os.getenv('POSTGRES_USER')
 env_password = os.getenv('POSTGRES_PASSWORD')
@@ -17,10 +16,6 @@ conn.autocommit = True
 cur = conn.cursor()
 
 create_db_query = '''
--- Database: bigbrother
-
--- DROP DATABASE IF EXISTS bigbrother;
-
 CREATE DATABASE bigbrother
     WITH
     OWNER = postgres
@@ -31,9 +26,6 @@ CREATE DATABASE bigbrother
     TABLESPACE = pg_default
     CONNECTION LIMIT = -1
     IS_TEMPLATE = False;
-
-COMMENT ON DATABASE bigbrother
-    IS 'Database for Big Brother tool for Spotify.';
 '''
 
 create_schema_query = '''
