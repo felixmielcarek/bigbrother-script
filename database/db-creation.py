@@ -4,21 +4,21 @@ import psycopg2
 env_user = os.getenv('POSTGRES_USER')
 env_password = os.getenv('POSTGRES_PASSWORD')
 
-# Establish connection to the PostgreSQL database
-conn = psycopg2.connect(
-    user=env_user, 
-    password=env_password, 
-    host="felixmielcarek-bigbrotherdb"
-)
-conn.autocommit = True
-
-# Create a cursor object to execute SQL queries
-cur = conn.cursor()
+def executeDBQuery(query):
+    conn = psycopg2.connect(
+        user=env_user, 
+        password=env_password, 
+        host="felixmielcarek-bigbrotherdb"
+    )
+    conn.autocommit = True
+    cur = conn.cursor()
+    cur.execute(query)
+    cur.close()
+    conn.close()
 
 create_db_query = '''
 CREATE DATABASE bigbrother
     WITH
-    OWNER = postgres
     ENCODING = 'UTF8'
     LC_COLLATE = 'French_France.1252'
     LC_CTYPE = 'French_France.1252'
@@ -29,10 +29,6 @@ CREATE DATABASE bigbrother
 '''
 
 create_schema_query = '''
--- SCHEMA: public
-
--- DROP SCHEMA IF EXISTS public ;
-
 CREATE SCHEMA IF NOT EXISTS public
     AUTHORIZATION pg_database_owner;
 
@@ -44,12 +40,7 @@ GRANT USAGE ON SCHEMA public TO PUBLIC;
 GRANT ALL ON SCHEMA public TO pg_database_owner;
 '''
 
-# Define your SQL query to create a table
 create_table_query = '''
--- Table: public.users
-
--- DROP TABLE IF EXISTS public.users;
-
 CREATE TABLE IF NOT EXISTS public.users
 (
     spotifyid character varying COLLATE pg_catalog."default" NOT NULL,
@@ -64,13 +55,6 @@ ALTER TABLE IF EXISTS public.users
     OWNER to postgres;
 '''
 
-# Execute the SQL queries
-
-#Creating a database
-cur.execute(create_db_query)
-#cur.execute(create_schema_query)
-#cur.execute(create_table_query)
-
-# Close the cursor and the connection
-cur.close()
-conn.close()
+executeDBQuery(create_db_query)
+executeDBQuery(create_schema_query)
+executeDBQuery(create_table_query)
