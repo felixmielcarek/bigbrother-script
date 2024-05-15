@@ -8,7 +8,7 @@ steps:
     image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
     environment:
       IMAGENAME: postgres:latest
-      CONTAINERNAME: pgsql
+      CONTAINERNAME: bigbrotherdb
       COMMAND: create
       OVERWRITE: false
       PRIVATE: true
