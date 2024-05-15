@@ -7,7 +7,6 @@ env_password = os.getenv('POSTGRES_PASSWORD')
 
 # Establish connection to the PostgreSQL database
 conn = psycopg2.connect(
-    dbname="postgres", 
     user=env_user, 
     password=env_password, 
     host="felixmielcarek-bigbrotherdb"
@@ -81,4 +80,5 @@ cur.execute(create_schema_query)
 cur.execute(create_table_query)
 
 # Close the cursor and the connection
+cur.close()
 conn.close()
