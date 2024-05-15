@@ -25,5 +25,6 @@ steps:
     image: python:latest
     commands:
       - cd database/
-      - pip install 
+      - pip install psycopg2
+      - pip install os
       - python3 db-creation.py
