@@ -30,10 +30,4 @@ steps:
     environment:
      POSTGRES_ROOT_PASSWORD:
        from_secret: db_root_password
-     POSTGRES_DATABASE:
-       from_secret: db_database
-     POSTGRES_USER:
-       from_secret: db_user
-     POSTGRES_PASSWORD:
-       from_secret: db_password
     depends_on: [ deploy-container-pgsql ]
