@@ -6,7 +6,7 @@ conn = psycopg2.connect(
     dbname=os.getenv('POSTGRES_DATABASE'),
     user=os.getenv('POSTGRES_USER'),
     password=os.getenv('POSTGRES_PASSWORD'),
-    host="localhost"
+    host="0.0.0.0"
 )
 
 # Create a cursor object to execute SQL queries
