@@ -45,13 +45,21 @@ steps:
         from_secret: SECRET_REGISTRY_USERNAME
       password:         
         from_secret: SECRET_REGISTRY_PASSWORD
-    
-#    environment:
-#      POSTGRES_USER:
-#        from_secret: db_user
-#      POSTGRES_PASSWORD:
-#        from_secret: db_password
-#      CLIENT_ID:
-#        from_secret: spotify_client_id
-#      CLIENT_SECRET:
-#        from_secret: spotify_client_id
+
+  - name: deploy-container-webapp
+      image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
+      environment:
+          IMAGENAME: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother:latest
+          CONTAINERNAME: bigbrotherwebapp
+          COMMAND: create
+          OVERWRITE: true
+          POSTGRES_USER:
+            from_secret: db_user
+          POSTGRES_PASSWORD:
+            from_secret: db_password
+          POSTGRES_DATABASE:
+            from_secret: db_database
+          CLIENT_ID:
+            from_secret: spotify_client_id
+          CLIENT_SECRET:
+            from_secret: spotify_client_id
