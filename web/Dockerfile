@@ -5,9 +5,6 @@ RUN apt-get update && \
     apt-get install -y python3 python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && \
-    apt-get install -y tree
-
 # Set working directory inside the container
 WORKDIR /usr/src/app
 
@@ -16,12 +13,11 @@ RUN npm install ./web/src
 
 COPY web ./web/
 COPY common ./common/
+RUN touch common/.env
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 80
 
 # Command to run the application
 CMD ["python3", "common/set-env-var.py"]
-CMD ["tree"]
-CMD ["cat", "common/.env"]
 CMD ["node", "--env-file=common/.env" , "web/src/app.js"]

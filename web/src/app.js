@@ -9,10 +9,10 @@ const pg = require('pg');
 
 //#region CONSTANTS
 const staticDir = path.join(__dirname, '../public');
-const port = 3000
+const port = 80
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const redirectUri = 'http://localhost:3000/callback';
+const redirectUri = 'http://localhost:80/callback';
 const scope = 'user-read-private user-read-email user-library-read user-library-modify';
 const { Client } = pg
 const client = new Client({
