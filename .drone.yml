@@ -10,7 +10,7 @@ steps:
       IMAGENAME: postgres:latest
       CONTAINERNAME: bigbrotherdb
       COMMAND: create
-      # OVERWRITE: false
+      OVERWRITE: false
       PRIVATE: true
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_ROOT_PASSWORD:
         from_secret: db_root_password
@@ -21,15 +21,37 @@ steps:
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
         from_secret: db_password
 
-  - name: create-bigbrother-database
-    image: python:latest
-    commands:
-      - cd database/
-      - pip install psycopg2
-      - python3 db-creation.py
-    environment:
-      POSTGRES_USER:
-        from_secret: db_user
-      POSTGRES_PASSWORD:
-        from_secret: db_password
-    depends_on: [ deploy-container-pgsql ]
+#  - name: create-bigbrother-database
+#    image: python:latest
+#    commands:
+#      - cd database/
+#      - pip install psycopg2
+#      - python3 db-creation.py
+#    environment:
+#      POSTGRES_USER:
+#        from_secret: db_user
+#      POSTGRES_PASSWORD:
+#        from_secret: db_password
+#    depends_on: [ deploy-container-pgsql ]
+
+  - name: build-image-webapp
+    image: plugins/docker
+    settings:
+      dockerfile: web/Dockerfile
+      context: ./
+      registry: hub.codefirst.iut.uca.fr
+      repo: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother
+      username:         
+        from_secret: SECRET_REGISTRY_USERNAME
+      password:         
+        from_secret: SECRET_REGISTRY_PASSWORD
+    
+#    environment:
+#      POSTGRES_USER:
+#        from_secret: db_user
+#      POSTGRES_PASSWORD:
+#        from_secret: db_password
+#      CLIENT_ID:
+#        from_secret: spotify_client_id
+#      CLIENT_SECRET:
+#        from_secret: spotify_client_id

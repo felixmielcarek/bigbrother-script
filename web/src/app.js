@@ -16,10 +16,10 @@ const redirectUri = 'http://localhost:3000/callback';
 const scope = 'user-read-private user-read-email user-library-read user-library-modify';
 const { Client } = pg
 const client = new Client({
-  user: process.env.DB_USER,
-  host: 'localhost',
-  database: 'bigbrother',
-  password: process.env.DB_PASSWORD,
+  user: process.env.POSTGRES_USER,
+  host: 'felixmielcarek-bigbrotherdb',
+  database: process.env.POSTGRES_DATABASE,
+  password: process.env.POSTGRES_PASSWORD,
   port: 5432
 })
 //#endregion
@@ -33,9 +33,9 @@ const app = express()
 app.use(cookieParser());
 app.use(express.static(staticDir));
 app.get('/', function (req, res) {
-  req.cookies['account'] == 'true'
+  /*req.cookies['account'] == 'true'
     ? res.sendFile(staticDir + '/home.html')
-    : res.sendFile(staticDir + '/login.html');
+    :*/ res.sendFile(staticDir + '/login.html');
 });
 
 app.listen(port, () => {
@@ -70,7 +70,7 @@ app.get('/login', function (req, res) {
 
 //#region ACCESS TOKEN
 app.get('/callback', (req, res) => {
-  res.cookie('account', 'true', { maxAge: 360000 });
+  //res.cookie('account', 'true', { maxAge: 360000 });
 
   const code = req.query.code;
   if(state != req.query.state) {
