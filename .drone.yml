@@ -27,3 +27,4 @@ steps:
       - cd database/
       - pip install psycopg2
       - python3 db-creation.py
+    depends_on: [ deploy-container-pgsql ]
