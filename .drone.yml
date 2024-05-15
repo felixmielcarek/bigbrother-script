@@ -23,6 +23,15 @@ steps:
 
   - name: create-bigbrother-database
     image: python:latest
+    environment:
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_ROOT_PASSWORD:
+        from_secret: db_root_password
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_DATABASE:
+        from_secret: db_database
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_USER:
+        from_secret: db_user
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
+        from_secret: db_password
     commands:
       - cd database/
       - pip install psycopg2
