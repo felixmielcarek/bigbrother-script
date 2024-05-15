@@ -8,8 +8,8 @@ RUN apt-get update && \
 # Set working directory inside the container
 WORKDIR /usr/src/app
 
-COPY web/* ./
-COPY common/* ./
+COPY web ./
+COPY common ./
 
 # Install dependencies
 RUN npm install ./web/src

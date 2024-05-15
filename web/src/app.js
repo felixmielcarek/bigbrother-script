@@ -1,7 +1,7 @@
 //#region REQUIRE
 const path = require('path');
 const express = require('express')
-const cookieParser = require('cookie-parser');
+//const cookieParser = require('cookie-parser');
 const axios = require('axios');
 const queryString = require('querystring');
 const pg = require('pg');
@@ -30,7 +30,7 @@ let state = '';
 
 //#region APP INIT
 const app = express()
-app.use(cookieParser());
+//app.use(cookieParser());
 app.use(express.static(staticDir));
 app.get('/', function (req, res) {
   /*req.cookies['account'] == 'true'
