@@ -22,8 +22,8 @@ steps:
         from_secret: db_password
 
   - name: create-bigbrother-database
-    image: node:latest
+    image: python:latest
     commands:
       - cd database/
-      - npm install
-      - node database/db-creation.js
+      - pip install 
+      - python3 db-creation.py
