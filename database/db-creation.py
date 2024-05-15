@@ -4,8 +4,8 @@ import os
 # Establish connection to the PostgreSQL database
 conn = psycopg2.connect(
     dbname=os.getenv('POSTGRES_DATABASE'),
-    user=os.getenv('POSTGRES_USER'),
-    password=os.getenv('POSTGRES_PASSWORD'),
+    user='postgres',
+    password=os.getenv('POSTGRES_ROOT_PASSWORD'),
     host="felixmielcarek-bigbrotherdb"
 )
 
