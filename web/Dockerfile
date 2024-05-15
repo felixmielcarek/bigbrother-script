@@ -12,6 +12,7 @@ COPY web ./
 COPY common ./
 
 # Install dependencies
+RUN tree
 RUN npm install ./web/src
 RUN pip3 install os
 
