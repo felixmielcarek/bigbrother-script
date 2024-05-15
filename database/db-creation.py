@@ -5,10 +5,6 @@ env_dbname = os.getenv('POSTGRES_DATABASE')
 env_user = os.getenv('POSTGRES_USER')
 env_password = os.getenv('POSTGRES_PASSWORD')
 
-print(env_dbname)
-print(env_user)
-print(env_password)
-
 # Establish connection to the PostgreSQL database
 conn = psycopg2.connect(dbname=env_dbname, user=env_user, password=env_password, host="felixmielcarek-bigbrotherdb")
 
