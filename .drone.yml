@@ -33,6 +33,7 @@ steps:
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
         from_secret: db_password
     commands:
+      - echo $POSTGRES_DATABASE
       - cd database/
       - pip install psycopg2
       - python3 db-creation.py
