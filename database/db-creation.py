@@ -2,13 +2,14 @@ import os
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-env_root_password = os.getenv('POSTGRES_ROOT_PASSWORD')
+env_user = os.getenv('POSTGRES_USER')
+env_password = os.getenv('POSTGRES_PASSWORD')
 
 # Establish connection to the PostgreSQL database
 conn = psycopg2.connect(
     dbname="postgres", 
-    user="postgres", 
-    password=env_root_password, 
+    user=env_user, 
+    password=env_password, 
     host="felixmielcarek-bigbrotherdb"
 )
 conn.autocommit = True
