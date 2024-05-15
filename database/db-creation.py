@@ -76,8 +76,8 @@ ALTER TABLE IF EXISTS public.users
 
 #Creating a database
 cur.execute(create_db_query)
-cur.execute(create_schema_query)
-cur.execute(create_table_query)
+#cur.execute(create_schema_query)
+#cur.execute(create_table_query)
 
 # Close the cursor and the connection
 cur.close()
