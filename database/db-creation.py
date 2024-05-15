@@ -1,5 +1,6 @@
-import psycopg2
 import os
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 env_dbname = os.getenv('POSTGRES_DATABASE')
 env_user = os.getenv('POSTGRES_USER')
@@ -7,11 +8,10 @@ env_password = os.getenv('POSTGRES_PASSWORD')
 
 # Establish connection to the PostgreSQL database
 conn = psycopg2.connect(dbname="postgres", user=env_user, password=env_password, host="felixmielcarek-bigbrotherdb")
+con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
 # Create a cursor object to execute SQL queries
 cur = conn.cursor()
-
-conn.autocommit = True
 
 create_db_query = '''
 -- Database: bigbrother
