@@ -76,7 +76,6 @@ ALTER TABLE IF EXISTS public.users
 # Execute the SQL queries
 
 #Creating a database
-conn.close()
 cur.execute(create_db_query)
 cur.execute(create_schema_query)
 cur.execute(create_table_query)
