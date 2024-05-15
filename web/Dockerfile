@@ -5,6 +5,9 @@ RUN apt-get update && \
     apt-get install -y python3 python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && \
+    apt-get install -y tree
+
 # Set working directory inside the container
 WORKDIR /usr/src/app
 
@@ -19,4 +22,6 @@ EXPOSE 3000
 
 # Command to run the application
 CMD ["python3", "common/set-env-var.py"]
+CMD ["tree"]
+CMD ["cat", "common/.env"]
 CMD ["node", "--env-file=common/.env" , "web/src/app.js"]
