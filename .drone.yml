@@ -26,5 +26,4 @@ steps:
     commands:
       - cd database/
       - pip install psycopg2
-      - pip install os
       - python3 db-creation.py
