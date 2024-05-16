@@ -9,12 +9,12 @@ const thresholdLove = 0.6;
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const client = new Client({
-    user: process.env.DB_USER,
-    host: 'localhost',
-    database: 'bigbrother',
-    password: process.env.DB_PASSWORD,
+    host: 'felixmielcarek-bigbrotherdb',
+    user: process.env.POSTGRES_USER,
+    database: process.env.POSTGRES_DATABASE,
+    password: process.env.POSTGRES_PASSWORD,
     port: 5432
-});
+  })
 //#endregion
 
 //#region STRUCTURE
