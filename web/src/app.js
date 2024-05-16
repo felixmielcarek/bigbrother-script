@@ -12,7 +12,7 @@ const staticDir = path.join(__dirname, '../public');
 const port = 80
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const redirectUri = 'http://localhost:80/callback';
+const redirectUri = 'https://codefirst.iut.uca.fr/containers/felixmielcarek-bigbrotherwebapp/callback';
 const scope = 'user-read-private user-read-email user-library-read user-library-modify';
 const { Client } = pg
 const client = new Client({
@@ -32,7 +32,7 @@ let state = '';
 const app = express()
 //app.use(cookieParser());
 app.use(express.static(staticDir));
-app.get('/', function (req, res) {
+app.get(['/',''], function (req, res) {
   /*req.cookies['account'] == 'true'
     ? res.sendFile(staticDir + '/home.html')
     :*/ res.sendFile(staticDir + '/login.html');
