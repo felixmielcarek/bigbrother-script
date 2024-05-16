@@ -8,10 +8,10 @@ RUN apt-get update && \
 # Set working directory inside the container
 WORKDIR /usr/src/app
 
-COPY web/src/package*.json ./web/src/
-RUN npm install ./web/src
+COPY callback-server/package*.json ./callback-server/
+RUN npm install ./callback-server
 
-COPY web ./web/
+COPY callback-server ./callback-server/
 COPY common ./common/
 RUN touch common/.env
 
@@ -20,4 +20,4 @@ EXPOSE 80
 
 # Command to run the application
 CMD ["python3", "common/set-env-var.py"]
-CMD ["node", "--env-file=common/.env" , "web/src/app.js"]
+CMD ["node", "--env-file=common/.env" , "callback-server/app.js"]
