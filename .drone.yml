@@ -64,3 +64,34 @@ steps:
       CLIENT_SECRET:
         from_secret: spotify_client_id
     depends_on: [ build-image-server ]
+  
+  - name: build-image-script
+    image: plugins/docker
+    settings:
+      dockerfile: script/Dockerfile
+      context: ./
+      registry: hub.codefirst.iut.uca.fr
+      repo: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother
+      username:         
+        from_secret: SECRET_REGISTRY_USERNAME
+      password:         
+        from_secret: SECRET_REGISTRY_PASSWORD
+
+  - name: deploy-container-script
+    image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
+    environment:
+      IMAGENAME: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother:latest
+      CONTAINERNAME: bigbrotherscript
+      COMMAND: create
+      OVERWRITE: true
+      POSTGRES_USER:
+        from_secret: db_user
+      POSTGRES_PASSWORD:
+        from_secret: db_password
+      POSTGRES_DATABASE:
+        from_secret: db_database
+      CLIENT_ID:
+        from_secret: spotify_client_id
+      CLIENT_SECRET:
+        from_secret: spotify_client_id
+    depends_on: [ build-image-script ]
