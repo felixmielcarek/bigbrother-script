@@ -14,11 +14,11 @@ steps:
       PRIVATE: true
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_ROOT_PASSWORD:
         from_secret: db_root_password
-      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_DATABASE:
+      CODEFIRST_CLIENTDRONE_ENV_PGDATABASE:
         from_secret: db_database
-      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_USER:
+      CODEFIRST_CLIENTDRONE_ENV_PGUSER:
         from_secret: db_user
-      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
+      CODEFIRST_CLIENTDRONE_ENV_PGPASSWORD:
         from_secret: db_password
 
   - name: create-bigbrother-database
