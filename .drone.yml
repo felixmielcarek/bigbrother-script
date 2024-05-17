@@ -45,6 +45,7 @@ steps:
         from_secret: SECRET_REGISTRY_USERNAME
       password:         
         from_secret: SECRET_REGISTRY_PASSWORD
+    depends_on: [ create-bigbrother-database ]
 
   - name: deploy-container-server
     image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
@@ -76,6 +77,7 @@ steps:
         from_secret: SECRET_REGISTRY_USERNAME
       password:         
         from_secret: SECRET_REGISTRY_PASSWORD
+    depends_on: [ create-bigbrother-database ]
 
   - name: deploy-container-script
     image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
