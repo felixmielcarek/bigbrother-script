@@ -10,7 +10,7 @@ steps:
       IMAGENAME: postgres:latest
       CONTAINERNAME: bigbrotherdb
       COMMAND: create
-      OVERWRITE: false
+      OVERWRITE: true
       PRIVATE: true
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_ROOT_PASSWORD:
         from_secret: db_root_password
@@ -40,7 +40,7 @@ steps:
       dockerfile: callback-server/Dockerfile
       context: ./
       registry: hub.codefirst.iut.uca.fr
-      repo: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother
+      repo: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother-server
       username:         
         from_secret: SECRET_REGISTRY_USERNAME
       password:         
@@ -50,7 +50,7 @@ steps:
   - name: deploy-container-server
     image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
     environment:
-      IMAGENAME: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother:latest
+      IMAGENAME: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother-server:latest
       CONTAINERNAME: bigbrotherserver
       COMMAND: create
       OVERWRITE: true
