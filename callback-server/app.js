@@ -19,6 +19,49 @@ app.listen(port, () => { console.log(`Big brother is listening on port ${port}`)
 //#endregion
 
 //#region ACCESS TOKEN
+app.get('/settings/deactivate', async (req,res) => {
+  const client = new Client({
+    host: 'felixmielcarek-bigbrotherdb',
+    user: process.env.POSTGRES_USER,
+    database: process.env.POSTGRES_DATABASE,
+    password: process.env.POSTGRES_PASSWORD,
+    port: 5432
+  })
+
+  const code = req.query.code;
+
+  var authOptions = {
+    url: 'https://accounts.spotify.com/api/token', method: 'post', json: true,
+    data: { code: code, redirect_uri: redirectUri, grant_type: 'authorization_code' },
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
+    }    
+  };
+
+  const response1 = await axios(authOptions);
+  const accessToken = response1.data.access_token
+
+  try {
+    const response2 = await axios.get(`https://api.spotify.com/v1/me`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
+
+    await client.connect()
+
+    const sqlQuery = `
+      DELETE FROM public.users
+      WHERE spotifyid = $1;
+    `;
+    
+    client.query(sqlQuery, [data.SpotifyId], (err, res) => {
+      if (err) {
+        console.error('Error executing query', err);
+        return;
+      }
+      console.log('Data deleted successfully');
+      client.end();
+    });
+  } catch (error) { console.log('Error getting user Spotify id') }
+})
 
 app.get('/', async (req, res) => {
   const client = new Client({
