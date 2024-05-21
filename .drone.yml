@@ -32,6 +32,8 @@ steps:
         from_secret: db_user
       MARIADB_PASSWORD:
         from_secret: db_password
+      MARIADB_DATABASE:
+        from_secret: db_database
     depends_on: [ deploy-container-db ]
 
   - name: build-image-server
@@ -54,11 +56,11 @@ steps:
       CONTAINERNAME: bigbrotherserver
       COMMAND: create
       OVERWRITE: true
-      POSTGRES_USER:
+      MARIADB_USER:
         from_secret: db_user
-      POSTGRES_PASSWORD:
+      MARIADB_PASSWORD:
         from_secret: db_password
-      POSTGRES_DATABASE:
+      MARIADB_DATABASE:
         from_secret: db_database
       CLIENT_ID:
         from_secret: spotify_client_id
@@ -86,11 +88,11 @@ steps:
       CONTAINERNAME: bigbrotherscript
       COMMAND: create
       OVERWRITE: true
-      POSTGRES_USER:
+      MARIADB_USER:
         from_secret: db_user
-      POSTGRES_PASSWORD:
+      MARIADB_PASSWORD:
         from_secret: db_password
-      POSTGRES_DATABASE:
+      MARIADB_DATABASE:
         from_secret: db_database
       CLIENT_ID:
         from_secret: spotify_client_id
