@@ -1,11 +1,11 @@
 import os
-import psycopg2
+import mariadb
 
 env_user = os.getenv('MARIADB_USER')
 env_password = os.getenv('MARIADB_PASSWORD')
 
 def executeDBQuery(query):
-    conn = psycopg2.connect(
+    conn = mariadb.connect(
         user=env_user, 
         password=env_password, 
         host="felixmielcarek-bigbrotherdb"
