@@ -20,14 +20,14 @@ app.listen(port, () => { console.log(`Big brother is listening on port ${port}`)
 
 //#region ACCESS TOKEN
 app.get('/settings/deactivate', async (req,res) => {
-  const client = mariadb.createPool({
+  const code = req.query.code;
+  
+  const pool = mariadb.createPool({
     host: 'felixmielcarek-bigbrotherdb',
     user: process.env.MARIADB_USER,
     database: process.env.MARIADB_DATABASE,
     password: process.env.MARIADB_PASSWORD
   });
-
-  const code = req.query.code;
 
   var authOptions = {
     url: 'https://accounts.spotify.com/api/token', method: 'post', json: true,
@@ -41,29 +41,30 @@ app.get('/settings/deactivate', async (req,res) => {
   const response1 = await axios(authOptions);
   const accessToken = response1.data.access_token
 
-  try {
-    const response2 = await axios.get(`https://api.spotify.com/v1/me`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
+  let conn;
 
-    await client.getConnection()
+  try {
+    conn = await pool.getConnection()
+    const response2 = await axios.get(`https://api.spotify.com/v1/me`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
 
     const sqlQuery = `
       DELETE FROM users
       WHERE spotifyid = ?;
     `;
     
-    client.query(sqlQuery, [response2.data.SpotifyId], (err, res) => {
+    conn.query(sqlQuery, [response2.data.SpotifyId], (err, res) => {
       if (err) {
         console.error('Error executing query', err);
         return;
       }
       console.log('Data deleted successfully');
-      client.end();
+      conn.end();
     });
   } catch (error) { console.log('Error getting user Spotify id') }
 })
 
 app.get('/', async (req, res) => {
-  const client = mariadb.createPool({
+  const pool = mariadb.createPool({
     host: 'felixmielcarek-bigbrotherdb',
     user: process.env.MARIADB_USER,
     database: process.env.MARIADB_DATABASE,
@@ -85,7 +86,11 @@ app.get('/', async (req, res) => {
   const accessToken = response1.data.access_token
   const refreshToken = response1.data.refresh_token
 
+  let conn;
+
   try {
+    conn = await pool.getConnection()
+    
     const response2 = await axios.get(`https://api.spotify.com/v1/me`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
     
     const data = {
@@ -93,8 +98,6 @@ app.get('/', async (req, res) => {
       AccessToken: accessToken,
       RefreshToken: refreshToken
     };
-
-    await client.getConnection()
 
     const sqlQuery = `
       INSERT INTO users (spotifyid, accesstoken, refreshtoken)
@@ -104,13 +107,13 @@ app.get('/', async (req, res) => {
       refreshtoken = VALUES(refreshtoken);
     `;
     
-    client.query(sqlQuery, [data.SpotifyId, data.AccessToken, data.RefreshToken], (err, res) => {
+    conn.query(sqlQuery, [data.SpotifyId, data.AccessToken, data.RefreshToken], (err, res) => {
       if (err) {
         console.error('Error executing query', err);
         return;
       }
       console.log('Data inserted/updated successfully');
-      client.end();
+      conn.end();
     });
   } catch (error) { console.log('Error getting user Spotify id') }
 });

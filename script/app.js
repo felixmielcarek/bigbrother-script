@@ -8,12 +8,6 @@ const spotifyRequestsLimit = 50;
 const thresholdLove = 0.6;
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const client = mariadb.createPool({
-    host: 'felixmielcarek-bigbrotherdb',
-    user: process.env.MARIADB_USER,
-    database: process.env.MARIADB_DATABASE,
-    password: process.env.MARIADB_PASSWORD
-});
 //#endregion
 
 //#region STRUCTURE
@@ -176,11 +170,20 @@ async function mainAlgorithm(accessToken) {
 }
 
 async function main() {
-    await client.getConnection();
+    const pool = mariadb.createPool({
+        host: 'felixmielcarek-bigbrotherdb',
+        user: process.env.MARIADB_USER,
+        database: process.env.MARIADB_DATABASE,
+        password: process.env.MARIADB_PASSWORD
+    });
+    
+    
 
     try {
+        conn = await pool.getConnection();
+
         const selectQuery = 'SELECT * FROM users';   
-        const selectResult = await client.query(selectQuery);
+        const selectResult = await conn.query(selectQuery);
 
         for(let row of selectResult.rows) {
             const spotifyId = row.spotifyid;
@@ -209,11 +212,11 @@ async function main() {
                 SET accesstoken = ?, refreshtoken = ?
                 WHERE spotifyid = ?;
             `;
-            await client.query(updateQuery, [spotifyId, newAccessToken, newRefreshToken])
+            await conn.query(updateQuery, [spotifyId, newAccessToken, newRefreshToken])
 
             await mainAlgorithm(newAccessToken);
         }
-    } catch (error) { console.error('Error executing select query:', error) } finally { await client.end() }
+    } catch (error) { console.error('Error executing select query:', error) } finally { await conn.end() }
 }
 //#endregion
 
