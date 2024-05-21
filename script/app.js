@@ -177,7 +177,7 @@ async function main() {
         password: process.env.MARIADB_PASSWORD
     });
     
-    
+    let conn;
 
     try {
         conn = await pool.getConnection();
