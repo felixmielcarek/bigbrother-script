@@ -1,6 +1,6 @@
 //#region REQUIRE
 const axios = require('axios');
-const { Client } = require('pg');
+const mariadb = require('mariadb');
 //#endregion
 
 //#region CONSTANTS
@@ -8,13 +8,12 @@ const spotifyRequestsLimit = 50;
 const thresholdLove = 0.6;
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const client = new Client({
+const client = mariadb.createPool({
     host: 'felixmielcarek-bigbrotherdb',
-    user: process.env.POSTGRES_USER,
-    database: process.env.POSTGRES_DATABASE,
-    password: process.env.POSTGRES_PASSWORD,
-    port: 5432
-})
+    user: process.env.MARIADB_USER,
+    database: process.env.MARIADB_DATABASE,
+    password: process.env.MARIADB_PASSWORD
+});
 //#endregion
 
 //#region STRUCTURE
@@ -177,10 +176,10 @@ async function mainAlgorithm(accessToken) {
 }
 
 async function main() {
-    await client.connect();
+    await client.getConnection();
 
     try {
-        const selectQuery = 'SELECT * FROM public.users';   
+        const selectQuery = 'SELECT * FROM users';   
         const selectResult = await client.query(selectQuery);
 
         for(let row of selectResult.rows) {
@@ -206,9 +205,9 @@ async function main() {
             const newRefreshToken = response.data.refresh_token;
 
             const updateQuery = `
-                UPDATE public.users
-                SET accesstoken = $2, refreshtoken = $3
-                WHERE spotifyid = $1;
+                UPDATE users
+                SET accesstoken = ?, refreshtoken = ?
+                WHERE spotifyid = ?;
             `;
             await client.query(updateQuery, [spotifyId, newAccessToken, newRefreshToken])
 

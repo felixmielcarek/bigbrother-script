@@ -1,7 +1,7 @@
 //#region REQUIRE
 const express = require('express')
 const axios = require('axios');
-const { Client } = require('pg');
+const mariadb = require('mariadb');
 //#endregion
 
 //#region CONSTANTS
@@ -20,13 +20,12 @@ app.listen(port, () => { console.log(`Big brother is listening on port ${port}`)
 
 //#region ACCESS TOKEN
 app.get('/settings/deactivate', async (req,res) => {
-  const client = new Client({
+  const client = mariadb.createPool({
     host: 'felixmielcarek-bigbrotherdb',
-    user: process.env.POSTGRES_USER,
-    database: process.env.POSTGRES_DATABASE,
-    password: process.env.POSTGRES_PASSWORD,
-    port: 5432
-  })
+    user: process.env.MARIADB_USER,
+    database: process.env.MARIADB_DATABASE,
+    password: process.env.MARIADB_PASSWORD
+  });
 
   const code = req.query.code;
 
@@ -45,14 +44,14 @@ app.get('/settings/deactivate', async (req,res) => {
   try {
     const response2 = await axios.get(`https://api.spotify.com/v1/me`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
 
-    await client.connect()
+    await client.getConnection()
 
     const sqlQuery = `
-      DELETE FROM public.users
-      WHERE spotifyid = $1;
+      DELETE FROM users
+      WHERE spotifyid = ?;
     `;
     
-    client.query(sqlQuery, [data.SpotifyId], (err, res) => {
+    client.query(sqlQuery, [response2.data.SpotifyId], (err, res) => {
       if (err) {
         console.error('Error executing query', err);
         return;
@@ -64,13 +63,12 @@ app.get('/settings/deactivate', async (req,res) => {
 })
 
 app.get('/', async (req, res) => {
-  const client = new Client({
+  const client = mariadb.createPool({
     host: 'felixmielcarek-bigbrotherdb',
-    user: process.env.POSTGRES_USER,
-    database: process.env.POSTGRES_DATABASE,
-    password: process.env.POSTGRES_PASSWORD,
-    port: 5432
-  })
+    user: process.env.MARIADB_USER,
+    database: process.env.MARIADB_DATABASE,
+    password: process.env.MARIADB_PASSWORD
+  });
 
   const code = req.query.code;
 
@@ -96,14 +94,14 @@ app.get('/', async (req, res) => {
       RefreshToken: refreshToken
     };
 
-    await client.connect()
+    await client.getConnection()
 
     const sqlQuery = `
-      INSERT INTO public.users (spotifyid,accesstoken,refreshtoken)
-      VALUES ($1,$2,$3)
-      ON CONFLICT (spotifyid) DO UPDATE SET
-      accesstoken = EXCLUDED.accesstoken,
-      refreshtoken = EXCLUDED.refreshtoken
+      INSERT INTO users (spotifyid, accesstoken, refreshtoken)
+      VALUES (?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+      accesstoken = VALUES(accesstoken),
+      refreshtoken = VALUES(refreshtoken);
     `;
     
     client.query(sqlQuery, [data.SpotifyId, data.AccessToken, data.RefreshToken], (err, res) => {

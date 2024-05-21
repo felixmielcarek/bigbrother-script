@@ -3,13 +3,14 @@ import mariadb
 
 env_user = os.getenv('MARIADB_USER')
 env_password = os.getenv('MARIADB_PASSWORD')
+env_database = os.getenv('MARIADB_DATABASE')
 
 def executeDBQuery(query):
     conn = mariadb.connect(
         user=env_user, 
         password=env_password, 
         host="felixmielcarek-bigbrotherdb",
-        database="bigbrother"
+        database=env_database
     )
     conn.autocommit = True
     cur = conn.cursor()
