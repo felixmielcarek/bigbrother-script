@@ -18,6 +18,10 @@ def executeDBQuery(query):
     cur.close()
     conn.close()
 
+grant_privileges_query = '''
+GRANT ALL PRIVILEGES ON {database}.* TO '{user}'@'%' IDENTIFIED BY '{password}';
+FLUSH PRIVILEGES;
+'''.format(database=env_database, user=env_user, password=env_password)
 
 create_table_query = '''
 CREATE TABLE IF NOT EXISTS users (
