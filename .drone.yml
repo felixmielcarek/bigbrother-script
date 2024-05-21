@@ -12,9 +12,7 @@ steps:
       COMMAND: create
       OVERWRITE: true
       PRIVATE: true
-      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_ROOT_PASSWORD:
-        from_secret: db_root_password
-      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_DATABASE:
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_DB:
         from_secret: db_database
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_USER:
         from_secret: db_user
