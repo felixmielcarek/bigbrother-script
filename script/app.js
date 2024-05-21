@@ -174,7 +174,8 @@ async function main() {
         host: 'felixmielcarek-bigbrotherdb',
         user: process.env.MARIADB_USER,
         database: process.env.MARIADB_DATABASE,
-        password: process.env.MARIADB_PASSWORD
+        password: process.env.MARIADB_PASSWORD,
+        connectionLimit: 5
     });
     
     let conn;

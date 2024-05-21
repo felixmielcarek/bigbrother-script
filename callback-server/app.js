@@ -26,8 +26,9 @@ app.get('/settings/deactivate', async (req,res) => {
     host: 'felixmielcarek-bigbrotherdb',
     user: process.env.MARIADB_USER,
     database: process.env.MARIADB_DATABASE,
-    password: process.env.MARIADB_PASSWORD
-  });
+    password: process.env.MARIADB_PASSWORD,
+    connectionLimit: 5
+});
 
   var authOptions = {
     url: 'https://accounts.spotify.com/api/token', method: 'post', json: true,
@@ -68,8 +69,9 @@ app.get('/', async (req, res) => {
     host: 'felixmielcarek-bigbrotherdb',
     user: process.env.MARIADB_USER,
     database: process.env.MARIADB_DATABASE,
-    password: process.env.MARIADB_PASSWORD
-  });
+    password: process.env.MARIADB_PASSWORD,
+    connectionLimit: 5
+});
 
   const code = req.query.code;
 
