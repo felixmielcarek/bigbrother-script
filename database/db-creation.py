@@ -8,7 +8,8 @@ def executeDBQuery(query):
     conn = mariadb.connect(
         user=env_user, 
         password=env_password, 
-        host="felixmielcarek-bigbrotherdb"
+        host="felixmielcarek-bigbrotherdb",
+        database="bigbrother"
     )
     conn.autocommit = True
     cur = conn.cursor()
