@@ -1,8 +1,8 @@
 import os
 import psycopg2
 
-env_user = os.getenv('POSTGRES_USER')
-env_password = os.getenv('POSTGRES_PASSWORD')
+env_user = os.getenv('MARIADB_USER')
+env_password = os.getenv('MARIADB_PASSWORD')
 
 def executeDBQuery(query):
     conn = psycopg2.connect(
@@ -16,34 +16,14 @@ def executeDBQuery(query):
     cur.close()
     conn.close()
 
-create_db_query = '''
-CREATE DATABASE bigbrother;
-'''
-
-create_schema_query = '''
-CREATE SCHEMA IF NOT EXISTS public
-    AUTHORIZATION pg_database_owner;
-
-COMMENT ON SCHEMA public
-    IS 'standard public schema';
-
-GRANT USAGE ON SCHEMA public TO PUBLIC;
-
-GRANT ALL ON SCHEMA public TO pg_database_owner;
-'''
 
 create_table_query = '''
-CREATE TABLE IF NOT EXISTS public.users
-(
-    spotifyid character varying COLLATE pg_catalog."default" NOT NULL,
-    accesstoken character varying COLLATE pg_catalog."default",
-    refreshtoken character varying COLLATE pg_catalog."default",
-    CONSTRAINT users_pkey PRIMARY KEY (spotifyid)
-)
-
-TABLESPACE pg_default;
+CREATE TABLE IF NOT EXISTS users (
+    spotifyid VARCHAR(255) NOT NULL,
+    accesstoken VARCHAR(255),
+    refreshtoken VARCHAR(255),
+    PRIMARY KEY (spotifyid)
+);
 '''
 
-executeDBQuery(create_db_query)
-executeDBQuery(create_schema_query)
 executeDBQuery(create_table_query)
