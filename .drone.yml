@@ -4,98 +4,98 @@ name: BB_PIPELINE
 
 
 steps:
-#  - name: deploy-container-db
-#    image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
-#    environment:
-#      IMAGENAME: mariadb:10
-#      CONTAINERNAME: bigbrotherdb
-#      COMMAND: create
-#      OVERWRITE: false
-#      PRIVATE: true
-#      CODEFIRST_CLIENTDRONE_ENV_MARIADB_ROOT_PASSWORD:
-#        from_secret: db_root_password
-#      CODEFIRST_CLIENTDRONE_ENV_MARIADB_DATABASE:
-#        from_secret: db_database
-#      CODEFIRST_CLIENTDRONE_ENV_MARIADB_USER:
-#        from_secret: db_user
-#      CODEFIRST_CLIENTDRONE_ENV_MARIADB_PASSWORD:
-#        from_secret: db_password
+ - name: deploy-container-db
+   image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
+   environment:
+     IMAGENAME: mariadb:10
+     CONTAINERNAME: bigbrotherdb
+     COMMAND: create
+     OVERWRITE: false
+     PRIVATE: true
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_ROOT_PASSWORD:
+       from_secret: db_root_password
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_DATABASE:
+       from_secret: db_database
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_USER:
+       from_secret: db_user
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_PASSWORD:
+       from_secret: db_password
 
-#  - name: create-bigbrother-database
-#    image: python:latest
-#    commands:
-#      - cd database/
-#      - pip3 install mariadb
-#      - python3 db-creation.py
-#    environment:
-#      MARIADB_USER:
-#        from_secret: db_user
-#      MARIADB_PASSWORD:
-#        from_secret: db_password
-#      MARIADB_DATABASE:
-#        from_secret: db_database
-#    depends_on: [ deploy-container-db ]
+ - name: create-bigbrother-database
+   image: python:latest
+   commands:
+     - cd database/
+     - pip3 install mariadb
+     - python3 db-creation.py
+   environment:
+     MARIADB_USER:
+       from_secret: db_user
+     MARIADB_PASSWORD:
+       from_secret: db_password
+     MARIADB_DATABASE:
+       from_secret: db_database
+   depends_on: [ deploy-container-db ]
 
-#  - name: build-image-server
-#    image: plugins/docker
-#    settings:
-#      dockerfile: callback-server/Dockerfile
-#      context: ./
-#      registry: hub.codefirst.iut.uca.fr
-#      repo: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother-server
-#      username:         
-#        from_secret: SECRET_REGISTRY_USERNAME
-#      password:         
-#        from_secret: SECRET_REGISTRY_PASSWORD
-#    depends_on: [ create-bigbrother-database ]
+ - name: build-image-server
+   image: plugins/docker
+   settings:
+     dockerfile: callback-server/Dockerfile
+     context: ./
+     registry: hub.codefirst.iut.uca.fr
+     repo: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother-server
+     username:         
+       from_secret: SECRET_REGISTRY_USERNAME
+     password:         
+       from_secret: SECRET_REGISTRY_PASSWORD
+   depends_on: [ create-bigbrother-database ]
 
-#  - name: deploy-container-server
-#    image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
-#    environment:
-#      IMAGENAME: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother-server:latest
-#      CONTAINERNAME: bigbrotherserver
-#      COMMAND: create
-#      OVERWRITE: true
-#      MARIADB_USER:
-#        from_secret: db_user
-#      MARIADB_PASSWORD:
-#        from_secret: db_password
-#      MARIADB_DATABASE:
-#        from_secret: db_database
-#      CLIENT_ID:
-#        from_secret: spotify_client_id
-#      CLIENT_SECRET:
-#        from_secret: spotify_client_id
-#    depends_on: [ build-image-server ]
+ - name: deploy-container-server
+   image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
+   environment:
+     IMAGENAME: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother-server:latest
+     CONTAINERNAME: bigbrotherserver
+     COMMAND: create
+     OVERWRITE: true
+     MARIADB_USER:
+       from_secret: db_user
+     MARIADB_PASSWORD:
+       from_secret: db_password
+     MARIADB_DATABASE:
+       from_secret: db_database
+     CLIENT_ID:
+       from_secret: spotify_client_id
+     CLIENT_SECRET:
+       from_secret: spotify_client_id
+   depends_on: [ build-image-server ]
   
-  - name: build-image-script
-    image: plugins/docker
-    settings:
-      dockerfile: script/Dockerfile
-      context: ./
-      registry: hub.codefirst.iut.uca.fr
-      repo: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother
-      username:         
-        from_secret: SECRET_REGISTRY_USERNAME
-      password:         
-        from_secret: SECRET_REGISTRY_PASSWORD
-    #depends_on: [ create-bigbrother-database ]
+  # - name: build-image-script
+  #   image: plugins/docker
+  #   settings:
+  #     dockerfile: script/Dockerfile
+  #     context: ./
+  #     registry: hub.codefirst.iut.uca.fr
+  #     repo: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother
+  #     username:         
+  #       from_secret: SECRET_REGISTRY_USERNAME
+  #     password:         
+  #       from_secret: SECRET_REGISTRY_PASSWORD
+  #   #depends_on: [ create-bigbrother-database ]
 
-  - name: deploy-container-script
-    image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
-    environment:
-      IMAGENAME: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother:latest
-      CONTAINERNAME: bigbrotherscript
-      COMMAND: create
-      OVERWRITE: true
-      MARIADB_USER:
-        from_secret: db_user
-      MARIADB_PASSWORD:
-        from_secret: db_password
-      MARIADB_DATABASE:
-        from_secret: db_database
-      CLIENT_ID:
-        from_secret: spotify_client_id
-      CLIENT_SECRET:
-        from_secret: spotify_client_id
-    depends_on: [ build-image-script ]
+  # - name: deploy-container-script
+  #   image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
+  #   environment:
+  #     IMAGENAME: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother:latest
+  #     CONTAINERNAME: bigbrotherscript
+  #     COMMAND: create
+  #     OVERWRITE: true
+  #     MARIADB_USER:
+  #       from_secret: db_user
+  #     MARIADB_PASSWORD:
+  #       from_secret: db_password
+  #     MARIADB_DATABASE:
+  #       from_secret: db_database
+  #     CLIENT_ID:
+  #       from_secret: spotify_client_id
+  #     CLIENT_SECRET:
+  #       from_secret: spotify_client_id
+  #   depends_on: [ build-image-script ]
