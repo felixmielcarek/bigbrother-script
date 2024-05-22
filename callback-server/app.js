@@ -2,6 +2,7 @@
 const express = require('express')
 const axios = require('axios');
 const mariadb = require('mariadb');
+const cors = require('cors');
 //#endregion
 
 //#region CONSTANTS
@@ -9,6 +10,7 @@ const port = 80
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = 'https://felixmielcarek.github.io/callback/';
+const allowedDomain = [ 'https://felixmielcarek.github.io' ];
 //#endregion
 
 //#region LOGS
@@ -20,6 +22,7 @@ function stepBeggining(step) {
 
 //#region APP INIT
 const app = express()
+app.use(cors({ origin: allowedDomain }));
 app.listen(port, () => { console.log(`Big brother is listening on port ${port}`) })
 //#endregion
 
