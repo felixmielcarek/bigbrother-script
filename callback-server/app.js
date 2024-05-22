@@ -51,7 +51,10 @@ app.get('/', async (req, res) => {
       AccessToken: accessToken,
       RefreshToken: refreshToken
     };
-  } catch (error) { console.log(`Error getting user Spotify id: ${error}`) }
+  } catch (error) {
+    console.log(`Error getting user Spotify id: ${error}`);
+    res.status(500).send('Error');
+  }
 
   const sqlQuery = `
     INSERT INTO users (spotifyid, accesstoken, refreshtoken)
@@ -78,9 +81,13 @@ app.get('/', async (req, res) => {
         return;
       }
       console.log('Data inserted/updated successfully');
+      res.status(200).send('Ok');
       conn.end();
     });
-  } catch (error) { console.log(`Error accessing database: ${error}`) }
+  } catch (error) { 
+    console.log(`Error accessing database: ${error}`);
+    res.status(500).send('Error');
+  }
 });
 
 app.get('/settings/deactivate', async (req,res) => {
@@ -102,7 +109,10 @@ app.get('/settings/deactivate', async (req,res) => {
     const accessToken = response1.data.access_token;
     const response2 = await axios.get(`https://api.spotify.com/v1/me`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
     userId = response2.data.SpotifyId;
-  } catch (error) { console.log(`Error getting user Spotify id: ${error}`) }
+  } catch (error) {
+    console.log(`Error getting user Spotify id: ${error}`);
+    res.status(500).send('Error');
+  }
 
   const sqlQuery = `
     DELETE FROM users
@@ -126,8 +136,12 @@ app.get('/settings/deactivate', async (req,res) => {
         return;
       }
       console.log('Data deleted successfully');
+      res.status(200).send('Ok');
       conn.end();
     });
-  } catch (error) { console.log(`Error accessing database: ${error}`) }
+  } catch (error) { 
+    console.log(`Error accessing database: ${error}`);
+    res.status(500).send('Error');
+  }
 });
 //#endregion
