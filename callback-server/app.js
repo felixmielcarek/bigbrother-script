@@ -11,6 +11,13 @@ const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = 'https://felixmielcarek.github.io/callback/';
 //#endregion
 
+//#region LOGS
+function stepBeggining(step) {
+    const sptor = "=".repeat(5);
+    console.log(`\n${sptor} ${step} ${sptor}`);
+}
+//#endregion
+
 //#region APP INIT
 const app = express()
 app.listen(port, () => { console.log(`Big brother is listening on port ${port}`) })
@@ -18,7 +25,8 @@ app.listen(port, () => { console.log(`Big brother is listening on port ${port}`)
 
 //#region ACCESS TOKEN
 app.get('/settings/deactivate', async (req,res) => {
-  //console.log("
+  stepBeggining("Setting: deactivation");
+  
   const code = req.query.code;
   const authOptions = {
     url: 'https://accounts.spotify.com/api/token', method: 'post', json: true,
@@ -65,6 +73,8 @@ app.get('/settings/deactivate', async (req,res) => {
 })
 
 app.get('/', async (req, res) => {
+  stepBeggining("Activation");
+  
   const code = req.query.code;
   const authOptions = {
     url: 'https://accounts.spotify.com/api/token', method: 'post', json: true,
