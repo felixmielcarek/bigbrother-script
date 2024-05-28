@@ -47,15 +47,15 @@ steps:
      password:         
        from_secret: SECRET_REGISTRY_PASSWORD
    environment:
-     CODEFIRST_CLIENTDRONE_ENV_MARIADB_USER:
+     MARIADB_USER:
        from_secret: db_user
-     CODEFIRST_CLIENTDRONE_ENV_MARIADB_PASSWORD:
+     MARIADB_PASSWORD:
        from_secret: db_password
-     CODEFIRST_CLIENTDRONE_ENV_MARIADB_DATABASE:
+     MARIADB_DATABASE:
        from_secret: db_database
-     CODEFIRST_CLIENTDRONE_ENV_CLIENT_ID:
+     CLIENT_ID:
        from_secret: spotify_client_id
-     CODEFIRST_CLIENTDRONE_ENV_CLIENT_SECRET:
+     CLIENT_SECRET:
        from_secret: spotify_client_secret
    depends_on: [ create-bigbrother-database ]
 
@@ -66,6 +66,26 @@ steps:
      CONTAINERNAME: bigbrotherserver
      COMMAND: create
      OVERWRITE: true
+     MARIADB_USER:
+       from_secret: db_user
+     MARIADB_PASSWORD:
+       from_secret: db_password
+     MARIADB_DATABASE:
+       from_secret: db_database
+     CLIENT_ID:
+       from_secret: spotify_client_id
+     CLIENT_SECRET:
+       from_secret: spotify_client_secret
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_USER:
+       from_secret: db_user
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_PASSWORD:
+       from_secret: db_password
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_DATABASE:
+       from_secret: db_database
+     CODEFIRST_CLIENTDRONE_ENV_CLIENT_ID:
+       from_secret: spotify_client_id
+     CODEFIRST_CLIENTDRONE_ENV_CLIENT_SECRET:
+       from_secret: spotify_client_secret
    depends_on: [ build-image-server ]
   
   # - name: build-image-script
