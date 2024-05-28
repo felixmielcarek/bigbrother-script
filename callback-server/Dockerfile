@@ -20,4 +20,5 @@ EXPOSE 80
 
 # Command to run the application
 CMD ["python3", "common/set-env-var.py"]
+CMD ["cat", "common/.env"]
 CMD ["node", "--env-file=common/.env" , "callback-server/app.js"]

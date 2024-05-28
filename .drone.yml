@@ -43,7 +43,7 @@ steps:
      context: ./
      registry: hub.codefirst.iut.uca.fr
      repo: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother-server
-     username:         
+     username:
        from_secret: SECRET_REGISTRY_USERNAME
      password:         
        from_secret: SECRET_REGISTRY_PASSWORD
