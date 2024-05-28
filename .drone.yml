@@ -2,7 +2,6 @@ kind: pipeline
 type: docker
 name: BB_PIPELINE
 
-
 steps:
  - name: deploy-container-db
    image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest

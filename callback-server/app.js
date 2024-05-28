@@ -30,6 +30,18 @@ app.use(express.json());
 app.listen(port, () => { console.log(`Big brother is listening on port ${port}`) })
 //#endregion
 
+const fs = require('fs');
+const path = '../.env';
+
+fs.readFile(path, 'utf8', (err, data) => {
+  if (err) {
+    console.error('Error reading the file:', err);
+    return;
+  }
+  console.log(data);
+});
+
+
 //#region ACCESS TOKEN
 app.post('/', async (req, res) => {
   console.log(clientId);
