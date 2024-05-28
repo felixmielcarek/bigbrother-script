@@ -29,6 +29,7 @@ app.listen(port, () => { console.log(`Big brother is listening on port ${port}`)
 
 //#region ACCESS TOKEN
 app.post('/', async (req, res) => {
+  console.log(clientId);
   stepBeggining("Activation");
   
   let data;
