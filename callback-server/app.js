@@ -32,8 +32,12 @@ app.post('/', async (req, res) => {
   
   const code = req.query.code;
   const authOptions = {
-    url: 'https://accounts.spotify.com/api/token', method: 'get', json: true,
-    data: { code: code, redirect_uri: redirectUri, grant_type: 'authorization_code' },
+    url: 'https://accounts.spotify.com/api/token', method: 'post', json: true,
+    data: { 
+      code: code, 
+      redirect_uri: redirectUri, 
+      grant_type: 'authorization_code' 
+    },
     headers: {
       'content-type': 'application/x-www-form-urlencoded',
       'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
