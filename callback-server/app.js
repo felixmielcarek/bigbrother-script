@@ -6,9 +6,12 @@ const cors = require('cors');
 //#endregion
 
 //#region CONSTANTS
-const port = 80
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
+const mariadbUser = process.env.MARIADB_USER;
+const mariadbDatabase = process.env.MARIADB_DATABASE;
+const mariadbPassword = process.env.MARIADB_PASSWORD;
+const port = 80
 const redirectUri = 'https://felixmielcarek.github.io/big-brother/callback/';
 const allowedDomain = [ 'https://felixmielcarek.github.io' ];
 //#endregion
@@ -82,9 +85,9 @@ app.post('/', async (req, res) => {
   try {    
     const pool = mariadb.createPool({
       host: 'felixmielcarek-bigbrotherdb',
-      user: process.env.MARIADB_USER,
-      database: process.env.MARIADB_DATABASE,
-      password: process.env.MARIADB_PASSWORD,
+      user: mariadbUser,
+      database: mariadbDatabase,
+      password: mariadbPassword,
       connectionLimit: 5
     });
 
@@ -137,9 +140,9 @@ app.get('/settings/deactivate', async (req,res) => {
   try {    
     const pool = mariadb.createPool({
       host: 'felixmielcarek-bigbrotherdb',
-      user: process.env.MARIADB_USER,
-      database: process.env.MARIADB_DATABASE,
-      password: process.env.MARIADB_PASSWORD,
+      user: mariadbUser,
+      database: mariadbDatabase,
+      password: mariadbPassword,
       connectionLimit: 5
     });
 
