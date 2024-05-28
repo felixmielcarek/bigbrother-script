@@ -14,11 +14,11 @@ RUN npm install ./callback-server
 COPY callback-server ./callback-server/
 COPY common ./common/
 RUN touch common/.env
+RUN python3 common/set-env-var.py
+RUN cat common/.env
 
 # Expose the port the app runs on
 EXPOSE 80
 
 # Command to run the application
-CMD ["python3", "common/set-env-var.py"]
-CMD ["cat", "common/.env"]
 CMD ["node", "--env-file=common/.env" , "callback-server/app.js"]
