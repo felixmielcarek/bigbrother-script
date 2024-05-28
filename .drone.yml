@@ -27,11 +27,11 @@ steps:
      - pip3 install mariadb
      - python3 db-creation.py
    environment:
-     CODEFIRST_CLIENTDRONE_ENV_MARIADB_USER:
+     MARIADB_USER:
        from_secret: db_user
-     CODEFIRST_CLIENTDRONE_ENV_MARIADB_ROOT_PASSWORD:
+     MARIADB_PASSWORD:
        from_secret: db_password
-     CODEFIRST_CLIENTDRONE_ENV_MARIADB_DATABASE:
+     MARIADB_DATABASE:
        from_secret: db_database
    depends_on: [ deploy-container-db ]
 

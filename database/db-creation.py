@@ -2,7 +2,7 @@ import os
 import mariadb
 
 env_user = os.getenv('MARIADB_USER')
-env_password = os.getenv('MARIADB_ROOT_PASSWORD')
+env_password = os.getenv('MARIADB_PASSWORD')
 env_database = os.getenv('MARIADB_DATABASE')
 
 def executeDBQuery(query):
