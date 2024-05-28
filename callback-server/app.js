@@ -31,7 +31,7 @@ app.listen(port, () => { console.log(`Big brother is listening on port ${port}`)
 //#endregion
 
 const fs = require('fs');
-const path = '../.env';
+const path = '/usr/src/app/.env';
 
 fs.readFile(path, 'utf8', (err, data) => {
   if (err) {
