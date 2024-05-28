@@ -53,6 +53,9 @@ app.post('/', async (req, res) => {
     refreshToken = response1.data.refresh_token
   } catch (error) {
     console.log(`Error getting Spotify token: ${error}`);
+    console.log(error.response.data);
+    console.log(error.response.status);
+    console.log(error.response.headers);
     res.status(500).send('Error');
   }
 
