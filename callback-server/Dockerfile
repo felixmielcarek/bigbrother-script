@@ -11,5 +11,4 @@ COPY callback-server ./callback-server/
 EXPOSE 80
 
 # Command to run the application
-CMD env > .env && cat .env
-CMD ["node", "--env-file=.env" , "callback-server/app.js"]
+CMD env > .env && node --env-file=.env callback-server/app.js
