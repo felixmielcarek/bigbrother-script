@@ -10,7 +10,7 @@ steps:
      IMAGENAME: mariadb:10
      CONTAINERNAME: bigbrotherdb
      COMMAND: create
-     OVERWRITE: false
+     OVERWRITE: true
      PRIVATE: true
      CODEFIRST_CLIENTDRONE_ENV_MARIADB_ROOT_PASSWORD:
        from_secret: db_root_password
@@ -47,15 +47,7 @@ steps:
        from_secret: SECRET_REGISTRY_USERNAME
      password:         
        from_secret: SECRET_REGISTRY_PASSWORD
-   depends_on: [ create-bigbrother-database ]
-
- - name: deploy-container-server
-   image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
    environment:
-     IMAGENAME: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother-server:latest
-     CONTAINERNAME: bigbrotherserver
-     COMMAND: create
-     OVERWRITE: true
      MARIADB_USER:
        from_secret: db_user
      MARIADB_PASSWORD:
@@ -66,6 +58,15 @@ steps:
        from_secret: spotify_client_id
      CLIENT_SECRET:
        from_secret: spotify_client_secret
+   depends_on: [ create-bigbrother-database ]
+
+ - name: deploy-container-server
+   image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
+   environment:
+     IMAGENAME: hub.codefirst.iut.uca.fr/felix.mielcarek/big-brother-server:latest
+     CONTAINERNAME: bigbrotherserver
+     COMMAND: create
+     OVERWRITE: true
    depends_on: [ build-image-server ]
   
   # - name: build-image-script

@@ -13,5 +13,4 @@ RUN env | awk -F= '{print $1 "=" $1}' > .env
 EXPOSE 80
 
 # Command to run the application
-CMD ["cat", ".env"]
 CMD ["node", "--env-file=.env" , "callback-server/app.js"]
