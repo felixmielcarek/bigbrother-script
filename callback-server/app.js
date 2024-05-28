@@ -23,6 +23,7 @@ function stepBeggining(step) {
 //#region APP INIT
 const app = express()
 app.use(cors({ origin: allowedDomain }));
+app.use(express.json());
 app.listen(port, () => { console.log(`Big brother is listening on port ${port}`) })
 //#endregion
 
@@ -33,7 +34,7 @@ app.post('/', async (req, res) => {
   let data;
   let accessToken;
   let refreshToken;
-  const code = req.query.code;
+  const code = req.body.code;
 
   try {
     const authOptions = {
@@ -54,8 +55,6 @@ app.post('/', async (req, res) => {
   } catch (error) {
     console.log(`Error getting Spotify token: ${error}`);
     console.log(error.response.data);
-    console.log(error.response.status);
-    console.log(error.response.headers);
     res.status(500).send('Error');
   }
 
