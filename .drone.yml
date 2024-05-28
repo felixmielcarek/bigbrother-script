@@ -27,11 +27,11 @@ steps:
      - pip3 install mariadb
      - python3 db-creation.py
    environment:
-     MARIADB_USER:
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_USER:
        from_secret: db_user
-     MARIADB_PASSWORD:
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_PASSWORD:
        from_secret: db_password
-     MARIADB_DATABASE:
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_DATABASE:
        from_secret: db_database
    depends_on: [ deploy-container-db ]
 
@@ -47,15 +47,15 @@ steps:
      password:         
        from_secret: SECRET_REGISTRY_PASSWORD
    environment:
-     MARIADB_USER:
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_USER:
        from_secret: db_user
-     MARIADB_PASSWORD:
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_PASSWORD:
        from_secret: db_password
-     MARIADB_DATABASE:
+     CODEFIRST_CLIENTDRONE_ENV_MARIADB_DATABASE:
        from_secret: db_database
-     CLIENT_ID:
+     CODEFIRST_CLIENTDRONE_ENV_CLIENT_ID:
        from_secret: spotify_client_id
-     CLIENT_SECRET:
+     CODEFIRST_CLIENTDRONE_ENV_CLIENT_SECRET:
        from_secret: spotify_client_secret
    depends_on: [ create-bigbrother-database ]
 
