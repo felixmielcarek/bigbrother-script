@@ -9,7 +9,7 @@ const cors = require('cors');
 const port = 80
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const redirectUri = '    https://felixmielcarek.github.io/big-brother/callback/';
+const redirectUri = 'https://felixmielcarek.github.io/big-brother/callback/';
 const allowedDomain = [ 'https://felixmielcarek.github.io' ];
 //#endregion
 
