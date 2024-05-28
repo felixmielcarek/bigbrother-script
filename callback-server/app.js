@@ -9,7 +9,7 @@ const cors = require('cors');
 const port = 80
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const redirectUri = 'https://felixmielcarek.github.io/callback/';
+const redirectUri = '    https://felixmielcarek.github.io/big-brother/callback/';
 const allowedDomain = [ 'https://felixmielcarek.github.io' ];
 //#endregion
 
@@ -30,25 +30,33 @@ app.listen(port, () => { console.log(`Big brother is listening on port ${port}`)
 app.post('/', async (req, res) => {
   stepBeggining("Activation");
   
-  const code = req.query.code;
-  const authOptions = {
-    url: 'https://accounts.spotify.com/api/token', method: 'post', json: true,
-    data: { 
-      code: code, 
-      redirect_uri: redirectUri, 
-      grant_type: 'authorization_code' 
-    },
-    headers: {
-      'content-type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
-    }    
-  };
   let data;
+  let accessToken;
+  let refreshToken;
+  const code = req.query.code;
 
   try {
+    const authOptions = {
+      url: 'https://accounts.spotify.com/api/token', method: 'post', json: true,
+      data: { 
+        code: code, 
+        redirect_uri: redirectUri, 
+        grant_type: 'authorization_code' 
+      },
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
+      }    
+    };
     const response1 = await axios(authOptions);
-    const accessToken = response1.data.access_token
-    const refreshToken = response1.data.refresh_token
+    accessToken = response1.data.access_token
+    refreshToken = response1.data.refresh_token
+  } catch (error) {
+    console.log(`Error getting Spotify token: ${error}`);
+    res.status(500).send('Error');
+  }
+
+  try {
     const response2 = await axios.get(`https://api.spotify.com/v1/me`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
     data = {
       SpotifyId: response2.data.id,
