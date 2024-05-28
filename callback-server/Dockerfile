@@ -7,7 +7,7 @@ COPY callback-server/package*.json ./callback-server/
 RUN npm install ./callback-server
 COPY callback-server ./callback-server/
 
-RUN env | awk -F= '{print $1 "=" $1}' > .env
+RUN env > .env
 
 # Expose the port the app runs on
 EXPOSE 80
