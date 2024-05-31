@@ -31,4 +31,4 @@ jobs:
         with:
           context: ./database
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/${{ github.repository }}-database:latest
