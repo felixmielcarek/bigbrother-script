@@ -1,5 +1,8 @@
 FROM postgres:latest
 
+ENV POSTGRES_DB=big-brother
+ENV POSTGRES_PASSWORD=postgres
+
 COPY init_db.py /docker-entrypoint-initdb.d/
 
 RUN apt-get update && \
