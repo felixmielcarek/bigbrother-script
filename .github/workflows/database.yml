@@ -1,35 +1,34 @@
-name: database
-on: [push]
-jobs:
-  database-creation:
-    runs-on: ubuntu-latest
+name: Build and publish the database Docker Image
 
-    services:
-      # Label used to access the service container
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: big-brother
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # Maps tcp port 5432 on service container to the host
-          - 5432:5432
+on:
+  push:
+    branches: ['main']
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: pip3 install psycopg2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Connect to PostgreSQL
-        run: python3 database/db-creation.py
-        env:
-          POSTGRES_HOST: postgres
-          POSTGRES_PORT: 5432
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./database
+          push: true
+          tags: ghcr.io/${{ github.repository }}:latest
