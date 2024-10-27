@@ -1,9 +1,21 @@
-//#region REQUIRE
-const axios = require('axios');
-const mariadb = require('mariadb');
+//#region IMPORTS
+import axios from 'axios';
+import dotenv from 'dotenv';
+import admin from 'firebase-admin';
 //#endregion
 
-//#region CONSTANTS
+//#region CONFIGURATIONS
+dotenv.config();
+
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  })
+});
+const db = admin.firestore();
+
 const spotifyRequestsLimit = 50;
 const thresholdLove = 0.6;
 const clientId = process.env.CLIENT_ID;
@@ -170,54 +182,38 @@ async function mainAlgorithm(accessToken) {
 }
 
 async function main() {
-    const pool = mariadb.createPool({
-        host: 'felixmielcarek-bigbrotherdb',
-        user: process.env.MARIADB_USER,
-        database: process.env.MARIADB_DATABASE,
-        password: process.env.MARIADB_PASSWORD,
-        connectionLimit: 5
-    });
-    
-    let conn;
-
     try {
-        conn = await pool.getConnection();
-
-        const selectQuery = 'SELECT * FROM users';   
-        const selectResult = await conn.query(selectQuery);
-
-        for(let row of selectResult.rows) {
-            const spotifyId = row.spotifyid;
-            const refreshToken = row.refreshtoken;            
-
+        const querySnapshot = await db.collection("users").get();
+        for (const doc of querySnapshot.docs) { 
+            const spotifyId = doc.id;
+            const refreshToken = doc.data().refreshToken;
+        
             let authOptions = {
                 url: 'https://accounts.spotify.com/api/token',
                 method: 'post',
-                data: {
+                data: new URLSearchParams({
                     refresh_token: refreshToken,
                     grant_type: 'refresh_token',
-                },
+                    client_id: clientId
+                }),
                 headers: {
                     'content-type': 'application/x-www-form-urlencoded',
-                    'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
-                },
-                json: true
+                    'Authorization': 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64'),
+                }
             };
-         
+        
             const response = await axios(authOptions);
             const newAccessToken = response.data.access_token;
             const newRefreshToken = response.data.refresh_token;
 
-            const updateQuery = `
-                UPDATE users
-                SET accesstoken = ?, refreshtoken = ?
-                WHERE spotifyid = ?;
-            `;
-            await conn.query(updateQuery, [spotifyId, newAccessToken, newRefreshToken])
-
+            await db.collection("users").doc(spotifyId).set({
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken !== undefined ? newRefreshToken : refreshToken,
+            });
+        
             await mainAlgorithm(newAccessToken);
         }
-    } catch (error) { console.error('Error executing select query:', error) } finally { await conn.end() }
+    } catch (error) { console.error('Error getting Firestore data: ', error) }
 }
 //#endregion
 

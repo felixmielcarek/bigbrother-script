@@ -1,19 +1,28 @@
-//#region REQUIRE
-const express = require('express')
-const axios = require('axios');
-const mariadb = require('mariadb');
-const cors = require('cors');
+//#region IMPORTS
+import express from 'express';
+import axios from 'axios';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import admin from 'firebase-admin';
 //#endregion
 
-//#region CONSTANTS
+//#region CONFIGURATIONS
+dotenv.config();
+
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  })
+});
+const db = admin.firestore();
+
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const mariadbUser = process.env.MARIADB_USER;
-const mariadbDatabase = process.env.MARIADB_DATABASE;
-const mariadbPassword = process.env.MARIADB_PASSWORD;
-const port = 80
-const redirectUri = 'https://felixmielcarek.github.io/big-brother/callback/';
-const allowedDomain = [ 'https://felixmielcarek.github.io' ];
+const port = process.env.PORT;
+const redirectUri = process.env.REDIRECT_URL;
+const allowedDomain = [ process.env.ALLOWED_DOMAIN ];
 //#endregion
 
 //#region LOGS
@@ -30,27 +39,14 @@ app.use(express.json());
 app.listen(port, () => { console.log(`Big brother is listening on port ${port}`) })
 //#endregion
 
-const fs = require('fs');
-const path = '/usr/src/app/.env';
-
-fs.readFile(path, 'utf8', (err, data) => {
-  if (err) {
-    console.error('Error reading the file:', err);
-    return;
-  }
-  console.log(data);
-});
-
-
 //#region ACCESS TOKEN
-app.post('/', async (req, res) => {
-  console.log(clientId);
+app.get('/callback', async (req, res) => {
   stepBeggining("Activation");
   
   let data;
   let accessToken;
   let refreshToken;
-  const code = req.body.code;
+  const code = req.query.code;
 
   try {
     const authOptions = {
@@ -86,89 +82,14 @@ app.post('/', async (req, res) => {
     res.status(500).send('Error');
   }
 
-  const sqlQuery = `
-    INSERT INTO users (spotifyid, accesstoken, refreshtoken)
-    VALUES (?, ?, ?)
-    ON DUPLICATE KEY UPDATE
-    accesstoken = VALUES(accesstoken),
-    refreshtoken = VALUES(refreshtoken);
-  `;
-
-  try {    
-    const pool = mariadb.createPool({
-      host: 'felixmielcarek-bigbrotherdb',
-      user: mariadbUser,
-      database: mariadbDatabase,
-      password: mariadbPassword,
-      connectionLimit: 5
-    });
-
-    const conn = await pool.getConnection();
-    
-    conn.query(sqlQuery, [data.SpotifyId, data.AccessToken, data.RefreshToken], (err, res) => {
-      if (err) {
-        console.error('Error executing query', err);
-        return;
-      }
-      console.log('Data inserted/updated successfully');
-      res.status(200).send('Ok');
-      conn.end();
-    });
-  } catch (error) { 
-    console.log(`Error accessing database: ${error}`);
-    res.status(500).send('Error');
-  }
-});
-
-app.get('/settings/deactivate', async (req,res) => {
-  stepBeggining("Setting: deactivation");
-  
-  const code = req.query.code;
-  const authOptions = {
-    url: 'https://accounts.spotify.com/api/token', method: 'post', json: true,
-    data: { code: code, redirect_uri: redirectUri, grant_type: 'authorization_code' },
-    headers: {
-      'content-type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Basic ' + (new Buffer.from(clientId + ':' + clientSecret).toString('base64'))
-    }
-  };
-  let userId;
-
   try {
-    const response1 = await axios(authOptions);
-    const accessToken = response1.data.access_token;
-    const response2 = await axios.get(`https://api.spotify.com/v1/me`, { headers: { 'Authorization': 'Bearer ' + accessToken, } });
-    userId = response2.data.SpotifyId;
-  } catch (error) {
-    console.log(`Error getting user Spotify id: ${error}`);
-    res.status(500).send('Error');
-  }
-
-  const sqlQuery = `
-    DELETE FROM users
-    WHERE spotifyid = ?;
-  `;
-  
-  try {    
-    const pool = mariadb.createPool({
-      host: 'felixmielcarek-bigbrotherdb',
-      user: mariadbUser,
-      database: mariadbDatabase,
-      password: mariadbPassword,
-      connectionLimit: 5
+    await db.collection("users").doc(data.SpotifyId).set({
+      accessToken: data.AccessToken,
+      refreshToken: data.RefreshToken,
     });
-
-    const conn = await pool.getConnection();
     
-    conn.query(sqlQuery, [userId], (err, res) => {
-      if (err) {
-        console.error('Error executing query', err);
-        return;
-      }
-      console.log('Data deleted successfully');
-      res.status(200).send('Ok');
-      conn.end();
-    });
+    console.log('Data inserted/updated successfully');
+    res.status(200).send('Ok');
   } catch (error) { 
     console.log(`Error accessing database: ${error}`);
     res.status(500).send('Error');
