@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../common.css">
+    <link rel="stylesheet" href="../style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../../resources/fm-logo.png">
+    <title>Big Brother</title>
+</head>
+<body>
+    <script>
+        function activation() {
+            if(activationState) {
+                var button = document.createElement('button');
+                button.textContent = 'Deactivate';
+                button.id = 'logButton';
+                button.className = 'activate-button';
+                document.getElementById('bb-content').appendChild(button);
+
+                document.addEventListener("DOMContentLoaded", function() {
+                    var redirectButton = document.getElementById("logButton");
+        
+                    redirectButton.addEventListener("click", function() {
+                        const params = {
+                            code: urlParams.get('code'),
+                            state: urlParams.get('state')
+                        };
+                        const options = {
+                            method: 'POST',
+                            body: JSON.stringify( params )
+                        };
+                        fetch('https://codefirst.iut.uca.fr/containers/felixmielcarek-bigbrotherwebapp/settings/deactivate', options )
+                        
+                        const queryUrl = new URL("https://felixmielcarek.github.io/big-brother/");
+                        window.location.href = queryUrl.href;
+                    });
+                });        
+            }
+        }                
+    </script>
+    <div class="main-content">
+        <div class="top-content">
+            <div class="top-text">
+                <div class="top-title">Big Brother</div>
+                <div class="top-description">Never forget again a good album with your Big Brother !</div>
+            </div>
+
+            <a href="../">
+                <img class="top-logo" src="../../resources/fm-logo.png"/>
+            </a>
+            
+        </div>
+
+        <div id="bb-content" class="bb-content">
+            <div>
+                <div>If you have liked at least 60% of the track of an album:</div>
+                <div>
+                    <ol>
+                        <li>add the album to your library</li>
+                        <li>removes the tracks from your Liked Songs playlist</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="activated-status">
+                <script>
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let activationState = false;
+
+                    if(urlParams.has('error')) { 
+                        console.log('Error: ' + urlParams.get('error'));
+                        document.write('Activation error');
+                    }
+                    else {
+                        const localState = localStorage.getItem("bigbrother-state") ?? "";
+                        if(localState.localeCompare(urlParams.get('state')) !=0 ) {
+                            console.log('Spotify state error');
+                            document.write('Activation error');
+                        }
+                        else {
+                            let activationState = true;
+                            document.write('Activated');
+            
+                            const params = {
+                                code: urlParams.get('code'),
+                                state: urlParams.get('state') 
+                            };
+                            const options = {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify( params )
+                            };
+                            fetch('https://codefirst.iut.uca.fr/containers/felixmielcarek-bigbrotherserver/', options )
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Network response was not ok ' + response.statusText);
+                                    }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    console.log(data);
+                                })
+                                .catch(error => {
+                                    console.error('There was a problem with the fetch operation:', error);
+                                });
+                        }
+                    }
+                    activation();
+                </script>
+            </div>                    
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="me">Me.</div>
+    </div>
+</body>
+</html>

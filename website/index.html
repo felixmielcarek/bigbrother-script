@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="./resources/fm-logo.png">
+    <title>Big Brother</title>
+</head>
+<body>
+    <div class="main-content">
+        <div class="top-content">
+            <div class="top-text">
+                <div class="top-title">Big Brother</div>
+                <div class="top-description">Never forget again a good album with your Big Brother !</div>
+            </div>
+
+            <img class="top-logo" src="./resources/fm-logo.png"/>
+        </div>
+
+        <div class="bb-content">
+            <div>
+                <div>If you have liked at least 60% of the track of an album:</div>
+                <div>
+                    <ol>
+                        <li>add the album to your library</li>
+                        <li>removes the tracks from your Liked Songs playlist</li>
+                    </ol>
+                </div>
+            </div>
+            <button id="logButton" class="activate-button">Activate</button>
+                        
+            <script>
+                function generateRandomString(length) {
+                    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let randomString = '';
+                    for (let i = 0; i < length; i++) {
+                        const randomIndex = Math.floor(Math.random() * charset.length);
+                        randomString += charset[randomIndex];
+                    }
+                    return randomString;
+                }
+        
+                document.addEventListener("DOMContentLoaded", function() {
+                    var redirectButton = document.getElementById("logButton");
+        
+                    redirectButton.addEventListener("click", function() {
+                        const state = generateRandomString(16);
+                        const queryUrl = new URL("https://accounts.spotify.com/authorize");
+                        queryUrl.searchParams.append("response_type", "code");
+                        queryUrl.searchParams.append("state", state);
+                        queryUrl.searchParams.append("client_id", "5ec7f30903414033a3381995754da3e8");
+                        queryUrl.searchParams.append("scope", "user-read-private user-read-email user-library-read user-library-modify");
+                        queryUrl.searchParams.append("redirect_uri", "big-brother-two.vercel.app:3000/callback");
+        
+                        localStorage.setItem("bigbrother-state", state);
+        
+                        window.location.href = queryUrl.href;
+                    });
+                });        
+            </script>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="me">Me.</div>
+    </div>
+</body>
+</html>
