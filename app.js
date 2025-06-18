@@ -1,25 +1,16 @@
 //#region IMPORTS
 import axios from 'axios';
 import dotenv from 'dotenv';
-import admin from 'firebase-admin';
 //#endregion
 
 //#region CONFIGURATIONS
 dotenv.config();
 
-admin.initializeApp({
-  credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    client_email: process.env.FIREBASE_CLIENT_EMAIL,
-  })
-});
-const db = admin.firestore();
-
 const spotifyRequestsLimit = 50;
 const thresholdLove = 0.6;
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
+const databaseUrl = process.env.DATABASE_URL;
 //#endregion
 
 //#region STRUCTURE
@@ -183,10 +174,12 @@ async function mainAlgorithm(accessToken) {
 
 async function main() {
     try {
-        const querySnapshot = await db.collection("users").get();
-        for (const doc of querySnapshot.docs) { 
-            const spotifyId = doc.id;
-            const refreshToken = doc.data().refreshToken;
+        const response = await axios.get(`${databaseUrl}/users`);
+        const users = response.data;
+
+        for (const user of users) {
+            const spotifyId = user.spotifyId;
+            const refreshToken = user.refreshToken;
         
             let authOptions = {
                 url: 'https://accounts.spotify.com/api/token',
@@ -206,14 +199,17 @@ async function main() {
             const newAccessToken = response.data.access_token;
             const newRefreshToken = response.data.refresh_token;
 
-            await db.collection("users").doc(spotifyId).set({
-                accessToken: newAccessToken,
-                refreshToken: newRefreshToken !== undefined ? newRefreshToken : refreshToken,
-            });
+            try {
+                const res = await axios.put(`${databaseUrl}/users/${spotifyId}/tokens`, {
+                    accessToken: newAccessToken,
+                    refreshToken: newRefreshToken !== undefined ? newRefreshToken : refreshToken
+                })
+                console.log('Utilisateur mis à jour :', res.data);
+            } catch (error) { console.error('Erreur lors de la mise à jour des tokens :', error); }
         
             await mainAlgorithm(newAccessToken);
         }
-    } catch (error) { console.error('Error getting Firestore data: ', error) }
+    } catch (error) { console.error('Error getting users data: ', error) }
 }
 //#endregion
 
