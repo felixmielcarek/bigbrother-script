@@ -10,7 +10,7 @@ const spotifyRequestsLimit = 50;
 const thresholdLove = 0.6;
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
-const databaseUrl = process.env.DATABASE_URL;
+const dbApiUrl = process.env.DBAPI_URL;
 //#endregion
 
 //#region STRUCTURE
@@ -174,7 +174,7 @@ async function mainAlgorithm(accessToken) {
 
 async function main() {
     try {
-        const response = await axios.get(`${databaseUrl}/users`);
+        const response = await axios.get(`${dbApiUrl}/users`);
         const users = response.data;
 
         for (const user of users) {
@@ -200,7 +200,7 @@ async function main() {
             const newRefreshToken = response.data.refresh_token;
 
             try {
-                const res = await axios.put(`${databaseUrl}/users/${spotifyId}/tokens`, {
+                const res = await axios.put(`${dbApiUrl}/users/${spotifyId}/tokens`, {
                     accessToken: newAccessToken,
                     refreshToken: newRefreshToken !== undefined ? newRefreshToken : refreshToken
                 })
